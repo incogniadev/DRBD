@@ -38,6 +38,8 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Eliminada información redundante y desactualizada de PROXMOX_DEBIAN.md
 - 2025-07-21: Actualizadas especificaciones y scripts de automatización en PROXMOX_DEBIAN.md
 - 2025-07-21: Añadida configuración específica de red dual y optimizaciones para entorno virtualizado
+- 2025-07-21: Corregida configuración inicial en PROXMOX_DEBIAN.md: instalación de sudo y configuración de usuario incognia
+- 2025-07-21: Añadida sección de configuración de usuario administrador post-instalación
 - 2025-07-21: Corregido formato de comandos qm create en PROXMOX_VM_CREATION.md para evitar errores de ejecución
 - 2025-07-21: Actualizadas especificaciones de disco en VMs: Nodos DRBD a 24GB/16GB y Node Docker a 32GB
 - 2025-07-21: Actualizados IDs de máquinas virtuales para coincidir con último octeto de IP (231, 232, 233)

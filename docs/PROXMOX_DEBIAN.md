@@ -11,19 +11,41 @@ Esta guía cubre la configuración específica de software después de instalar 
 
 ## Configuración inicial del sistema
 
-### 1. Preparación básica en todas las VMs
+### 1. Configuración inicial como root (en todas las VMs)
+
+**Nota**: Estos comandos deben ejecutarse como `root` inmediatamente después de la instalación de Debian.
 
 ```bash
 # Actualizar el sistema
-sudo apt update && sudo apt upgrade -y
+apt update && apt upgrade -y
 
-# Instalar utilidades básicas
-sudo apt install -y wget curl vim nano net-tools htop tree
+# Instalar sudo y utilidades básicas
+apt install -y sudo wget curl vim nano net-tools htop tree
+
+# Agregar usuario incognia (creado durante instalación) al grupo sudo
+usermod -aG sudo incognia
+
+# Verificar que el usuario está en el grupo sudo
+groups incognia
 
 # Instalar agente QEMU para mejor integración con Proxmox
-sudo apt install -y qemu-guest-agent
-sudo systemctl enable qemu-guest-agent
-sudo systemctl start qemu-guest-agent
+apt install -y qemu-guest-agent
+systemctl enable qemu-guest-agent
+systemctl start qemu-guest-agent
+
+# Cambiar a usuario incognia para el resto de la configuración
+su - incognia
+```
+
+### 2. Verificación de configuración de usuario
+
+```bash
+# Como usuario incognia, verificar que sudo funciona
+sudo whoami
+# Debería devolver: root
+
+# Verificar conectividad a internet
+ping -c 3 8.8.8.8
 ```
 
 ### 2. Configuración de red dual (todas las VMs)
