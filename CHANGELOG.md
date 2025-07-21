@@ -10,6 +10,10 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Añadida guía general INSTALLATION.md para todas las distribuciones de Linux
 - 2025-07-21: Creada guía específica PROXMOX_DEBIAN.md para la plataforma
 - 2025-07-21: Traducción completa de toda la documentación al español mexicano
+- 2025-07-21: Añadida guía completa PROXMOX_VM_CREATION.md para crear VMs desde shell de Proxmox
+- 2025-07-21: Script de automatización para creación masiva de VMs del laboratorio DRBD
+- 2025-07-21: Configuración específica para red vmbr2 en todas las VMs
+- 2025-07-21: Comandos de gestión y monitoreo de VMs en Proxmox
 
 ### Cambiado
 - 2025-07-21: Refactorizado README.md para enfocarse en el resumen del proyecto y el inicio rápido
