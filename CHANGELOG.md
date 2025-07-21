@@ -34,6 +34,10 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Actualizada imagen ISO de instalación a debian-12.11.0-amd64-netinst.iso en toda la documentación
 - 2025-07-21: Corregido formato de comandos qm create en PROXMOX_VM_CREATION.md para evitar errores de ejecución
 - 2025-07-21: Reescrito comandos qm create en formato de una sola línea para mayor compatibilidad y evitar errores de continuación de línea
+- 2025-07-21: Refactorizado completamente PROXMOX_DEBIAN.md enfocándolo en configuración post-instalación
+- 2025-07-21: Eliminada información redundante y desactualizada de PROXMOX_DEBIAN.md
+- 2025-07-21: Actualizadas especificaciones y scripts de automatización en PROXMOX_DEBIAN.md
+- 2025-07-21: Añadida configuración específica de red dual y optimizaciones para entorno virtualizado
 - 2025-07-21: Corregido formato de comandos qm create en PROXMOX_VM_CREATION.md para evitar errores de ejecución
 - 2025-07-21: Actualizadas especificaciones de disco en VMs: Nodos DRBD a 24GB/16GB y Node Docker a 32GB
 - 2025-07-21: Actualizados IDs de máquinas virtuales para coincidir con último octeto de IP (231, 232, 233)
