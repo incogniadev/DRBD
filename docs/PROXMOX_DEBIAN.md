@@ -1,6 +1,6 @@
-# Notas para implementación en Proxmox con Debian
+# Implementación en Proxmox con Debian
 
-Este documento contiene consideraciones específicas para implementar el laboratorio DRBD en un entorno Proxmox utilizando máquinas virtuales con Debian.
+Esta guía cubre la implementación específica del laboratorio DRBD en un entorno Proxmox utilizando máquinas virtuales con Debian.
 
 ## Configuración de máquinas virtuales en Proxmox
 
@@ -39,7 +39,7 @@ Este documento contiene consideraciones específicas para implementar el laborat
 # Floating IP: 192.168.10.230/24 (IP virtual para alta disponibilidad)
 ```
 
-## Instalación y configuración específica para Debian
+## Instalación específica para Debian en Proxmox
 
 ### 1. Preparación inicial del sistema
 
@@ -72,7 +72,7 @@ cat >> /etc/hosts << EOF
 EOF
 ```
 
-### 2. Configuración de red específica para Node3 Docker
+### 2. Configuración específica de red para Node3 Docker
 
 ```bash
 # Configuración de red dual para el host Docker (Node3)
@@ -108,18 +108,7 @@ ip addr show
 ip route show
 ```
 
-### 3. Configuración de SSH para el clúster
-
-```bash
-# En todos los nodos, generar llaves SSH
-ssh-keygen -t rsa -b 4096 -f ~/.ssh/id_rsa -N ""
-
-# Intercambiar llaves entre nodos (ejecutar desde node1 y node2)
-ssh-copy-id node1
-ssh-copy-id node2
-```
-
-### 4. Instalación específica de DRBD en Debian
+### 3. Instalación de DRBD en Debian
 
 ```bash
 # DRBD puede requerir el módulo del kernel
@@ -137,7 +126,7 @@ lsmod | grep drbd
 drbdadm --version
 ```
 
-### 5. Configuración específica de Pacemaker en Debian
+### 4. Configuración de Pacemaker en Debian
 
 ```bash
 # Instalar pacemaker y herramientas
@@ -156,7 +145,7 @@ passwd hacluster
 systemctl start pcsd
 ```
 
-### 6. Configuración de firewall (si está habilitado)
+### 5. Configuración de firewall
 
 ```bash
 # Si ufw está habilitado, configurar reglas para el clúster
@@ -173,7 +162,7 @@ ufw allow 111/tcp   # portmapper
 ufw allow 20048/tcp # mountd
 ```
 
-## Consideraciones específicas para Proxmox
+## Optimizaciones para entorno virtualizado
 
 ### 1. Configuración de discos virtuales
 
@@ -274,7 +263,7 @@ echo -e "\n=== Recursos de red ==="
 ip addr show | grep -A2 -E "(eth|enp)"
 ```
 
-## Solución de problemas específicos para Debian
+## Solución de problemas específicos
 
 ### 1. Problemas comunes con DRBD
 
@@ -313,17 +302,13 @@ systemctl status rpcbind
 exportfs -v
 ```
 
-## Notas importantes
+## Consideraciones importantes
 
-1. **Snapshots**: Considera hacer snapshots de las VMs en Proxmox antes de comenzar la configuración del clúster.
-
-2. **Backup**: El clúster DRBD no reemplaza los backups. Configura backups regulares de los datos importantes.
-
-3. **Monitoreo**: Considera instalar herramientas de monitoreo como `nagios` o `zabbix` para supervisar el estado del clúster.
-
-4. **Actualizaciones**: Ten cuidado con las actualizaciones del kernel, ya que pueden requerir recompilar el módulo DRBD.
-
-5. **Red**: Asegúrate de que la latencia de red entre los nodos DRBD sea baja (<1ms idealmente) para mejor rendimiento.
+1. **Snapshots**: Realiza snapshots de las VMs en Proxmox antes de configurar el clúster
+2. **Backup**: El clúster DRBD no reemplaza los backups regulares
+3. **Monitoreo**: Considera herramientas como nagios o zabbix para supervisión
+4. **Actualizaciones**: Ten cuidado con actualizaciones del kernel que requieren recompilar DRBD
+5. **Red**: Mantén latencia baja (<1ms idealmente) entre nodos DRBD
 
 ---
 

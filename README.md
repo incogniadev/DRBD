@@ -22,352 +22,143 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 - ✅ **Almacenamiento centralizado** - Punto único de gestión de almacenamiento para contenedores
 - ✅ **Escalabilidad** - Fácil adición de nuevos hosts Docker como clientes NFS
 
-## Arquitectura del sistema
+## Documentación
 
-```mermaid
-graph TB
-    subgraph "Storage Layer"
-        subgraph N1 ["Node 1 (Primary)"]
-            A1["/dev/sdb1<br/>Physical Device"]
-            A2["/dev/drbd0<br/>DRBD Primary"]
-            A3["/mnt/docker-vol<br/>Mounted Filesystem"]
-            A3a["Docker Images<br/>& Container Data"]
-            A4["NFS Server<br/>(Active)"]
-            A5["192.168.10.230<br/>Floating IP"]
-        end
-        
-        subgraph N2 ["Node 2 (Secondary)"]
-            B1["/dev/sdb1<br/>Physical Device"]
-            B2["/dev/drbd0<br/>DRBD Secondary"]
-            B3["/mnt/docker-vol<br/>Unmounted"]
-            B3a["Docker Images<br/>& Container Data<br/>(Replica)"]
-            B4["NFS Server<br/>(Standby)"]
-            B5["Pacemaker Agent<br/>(Standby)"]
-        end
-    end
-    
-    subgraph "Cluster Management"
-        C1["Pacemaker Cluster"]
-        C2["Resource Monitor"]
-        C3["Failover Controller"]
-        C4["IP Manager"]
-    end
-    
-    subgraph "Application Layer"
-        D1["Docker Host<br/>Node 3"]
-        D2["NFS Client"]
-        D3["Container 1"]
-        D4["Container 2"]
-        D5["Container N"]
-    end
-    
-    %% Storage flow
-    A1 --> A2
-    A2 --> A3
-    A3 --> A3a
-    A3a --> A4
-    A4 --> A5
-    
-    B1 --> B2
-    B2 --> B3
-    B3 --> B3a
-    B3a --> B4
-    
-    %% DRBD replication
-    A2 -.->|"Data Replication"| B2
-    
-    %% Pacemaker management
-    C1 --> C2
-    C2 --> C3
-    C3 --> C4
-    
-    %% Cluster monitoring
-    C2 -.->|"Monitor"| A2
-    C2 -.->|"Monitor"| B2
-    C2 -.->|"Monitor"| A4
-    C2 -.->|"Monitor"| B4
-    
-    %% Failover control
-    C3 -.->|"Promote/Demote"| A2
-    C3 -.->|"Promote/Demote"| B2
-    C3 -.->|"Start/Stop"| A4
-    C3 -.->|"Start/Stop"| B4
-    C4 -.->|"Manage"| A5
-    
-    %% Application access
-    D1 --> D2
-    D2 -->|"NFS Mount"| A5
-    D2 --> D3
-    D2 --> D4
-    D2 --> D5
-    
-    %% Standby reporting
-    B5 -.->|"Status Report"| C1
-    
-    %% Styling
-    classDef primary fill:#e1f5fe,stroke:#01579b,stroke-width:2px
-    classDef secondary fill:#fff3e0,stroke:#e65100,stroke-width:2px
-    classDef cluster fill:#f3e5f5,stroke:#4a148c,stroke-width:2px
-    classDef application fill:#e8f5e8,stroke:#2e7d32,stroke-width:2px
-    
-    class A1,A2,A3,A3a,A4,A5 primary
-    class B1,B2,B3,B3a,B4,B5 secondary
-    class C1,C2,C3,C4 cluster
-    class D1,D2,D3,D4,D5 application
-```
+### 📋 Guías disponibles
+
+| Documento | Descripción |
+|-----------|-------------|
+| [📐 **Arquitectura del sistema**](docs/ARCHITECTURE.md) | Diseño completo y componentes de la arquitectura DRBD |
+| [⚙️ **Guía de instalación**](docs/INSTALLATION.md) | Instrucciones generales de instalación y configuración |
+| [🏗️ **Implementación en Proxmox**](docs/PROXMOX_DEBIAN.md) | Guía específica para entornos Proxmox con Debian |
+| [📝 **Changelog**](CHANGELOG.md) | Historial de cambios del proyecto |
 
 ## Componentes del sistema
 
-### Node 1: Nodo DRBD primario
-- **Dispositivo físico**: `/dev/sdb1` - Dispositivo de bloque raw
-- **Dispositivo DRBD**: `/dev/drbd0` - Dispositivo de bloque replicado
-- **Punto de montaje**: `/mnt/docker-vol` - Montaje del sistema de archivos
-- **Servidor NFS**: Servicio NFS activo
-- **IP flotante**: `192.168.10.230` - IP virtual para alta disponibilidad
+### Descripción general de nodos
 
-### Node 2: Nodo DRBD secundario
-- **Dispositivo físico**: `/dev/sdb1` - Dispositivo de bloque raw (standby)
-- **Dispositivo DRBD**: `/dev/drbd0` - Dispositivo de bloque replicado (secundario)
-- **Punto de montaje**: `/mnt/docker-vol` - Montaje del sistema de archivos (standby)
-- **Servidor NFS**: Servicio NFS en standby
-- **Pacemaker**: Modo standby, listo para failover
+| Nodo | Función | IP Principal | IP del Clúster | Rol |
+|------|---------|--------------|----------------|-----|
+| **Node 1** | DRBD Primario | `10.0.0.231/8` | `192.168.10.231/24` | Almacenamiento activo, NFS activo |
+| **Node 2** | DRBD Secundario | `10.0.0.232/8` | `192.168.10.232/24` | Replica en standby, NFS standby |
+| **Node 3** | Host Docker | `10.0.0.233/8` | `192.168.10.233/24` | Ejecución de contenedores |
+| **VIP** | IP Flotante | - | `192.168.10.230/24` | Punto de acceso para alta disponibilidad |
 
-### Node 3: Host Docker
-- **Cliente NFS**: Se conecta al servicio NFS vía IP flotante
-- **Almacenamiento de contenedores**: Imágenes y contenedores almacenados en NFS; el servidor Docker es únicamente para ejecución
-- **Configuración de red**:
-  - **IP principal**: `10.0.0.233/8` - Red de administración
-  - **IP secundaria**: `192.168.10.233/24` - Red del clúster
-  - **Acceso NFS**: Conecta a la IP flotante `192.168.10.230/24` para servicios de almacenamiento
+### Características principales por nodo
+
+#### 🔵 Node 1 & Node 2: Nodos de almacenamiento DRBD
+- Replicación sincrónica de datos en tiempo real
+- Gestión automática de failover con Pacemaker
+- Servicio NFS para compartir almacenamiento
+- Dispositivos: `/dev/sdb1` → `/dev/drbd0` → `/mnt/docker-vol`
+
+#### 🟢 Node 3: Host de ejecución Docker
+- **Almacenamiento 100% centralizado en NFS**
+- Sin datos persistentes locales
+- Acceso transparente vía IP flotante
+- Configuración dual de red para administración y clúster
 
 ## Requisitos del sistema
 
-### Requisitos de hardware
-- **Nodos DRBD**: Mínimo 2 nodos con almacenamiento local
-- **Red dedicada**: Conexión de red de baja latencia entre nodos DRBD
-- **Host Docker**: Servidor con Docker Engine instalado
+### 💻 Hardware mínimo recomendado
 
-### Requisitos de software
-- **Sistema operativo**: Linux (Debian 11+, Ubuntu 20.04+, RHEL/CentOS 8+, SLES 15+)
-- **DRBD**: Versión 9.x o superior
-- **Pacemaker**: Versión 2.x o superior
-- **Corosync**: Para comunicación del clúster
-- **NFS Utils**: Para servicios NFS
-- **Docker**: Versión 20.x o superior
+| Componente | Node 1 & 2 (DRBD) | Node 3 (Docker) |
+|------------|-------------------|------------------|
+| **CPU** | 2 vCPUs | 2 vCPUs |
+| **RAM** | 2GB (4GB recomendado) | 4GB mínimo |
+| **Almacenamiento** | 20GB SO + 10GB DRBD | 30GB |
+| **Red** | 2 interfaces (gestión + clúster) | 2 interfaces |
 
-## Instalación y configuración
+### 🛠️ Software requerido
 
-### 1. Preparación de los nodos DRBD
+| Componente | Versión | Notas |
+|------------|---------|-------|
+| **Linux OS** | Debian 11+, Ubuntu 20.04+, RHEL/CentOS 8+ | - |
+| **DRBD** | 9.x+ | Con módulos del kernel |
+| **Pacemaker** | 2.x+ | Gestión de clúster |
+| **Corosync** | Compatible con Pacemaker | Comunicación del clúster |
+| **NFS** | v4+ | Cliente y servidor |
+| **Docker** | 20.x+ | En Node 3 únicamente |
 
+## 🚀 Inicio rápido
+
+Para comenzar con la implementación del clúster DRBD de alta disponibilidad, sigue estos pasos:
+
+### 1. Revisa la arquitectura
 ```bash
-# Para Debian/Ubuntu - Instalar DRBD y Pacemaker en ambos nodos
-apt update
-apt install -y drbd-utils pacemaker corosync nfs-kernel-server nfs-common
-
-# Para RedHat/Fedora/CentOS
-# yum install -y drbd90-kmp-default drbd90-utils pacemaker corosync nfs-utils
-
-# Configurar dispositivo DRBD
-cat > /etc/drbd.d/docker-vol.res << EOF
-resource docker-vol {
-    protocol C;
-    device /dev/drbd0;
-    disk /dev/sdb1;
-    meta-disk internal;
-    
-    on node1 {
-        address 192.168.10.231:7789;
-    }
-    
-    on node2 {
-        address 192.168.10.232:7789;
-    }
-}
-EOF
-
-# Crear metadata y inicializar DRBD
-drbdadm create-md docker-vol
-# En Debian, el servicio puede llamarse drbd o drbd9
-systemctl enable drbd
-systemctl start drbd
-# Si el servicio anterior falla, intenta con:
-# systemctl enable drbd9
-# systemctl start drbd9
-
-# En el nodo primario solamente
-drbdadm primary docker-vol --force
-mkfs.ext4 /dev/drbd0
+# Lee primero la documentación de arquitectura
+cat docs/ARCHITECTURE.md
 ```
 
-### 2. Configuración de Pacemaker
+### 2. Selecciona tu guía de instalación
 
+#### Instalación general (cualquier Linux)
 ```bash
-# Configurar Pacemaker en ambos nodos
-# Primero instalar pcs si no está disponible
-apt install -y pcs
-
-# Configurar contraseña para usuario hacluster
-passwd hacluster
-
-# Autenticar nodos
-pcs host auth node1 node2
-pcs cluster setup docker-cluster node1 node2
-pcs cluster start --all
-pcs cluster enable --all
-
-# Configurar recursos del clúster
-pcs resource create drbd_resource ocf:linbit:drbd \
-    drbd_resource=docker-vol \
-    op monitor interval=60s
-    
-pcs resource create drbd_fs Filesystem \
-    device="/dev/drbd0" \
-    directory="/mnt/docker-vol" \
-    fstype="ext4"
-    
-pcs resource create nfs_server nfsserver \
-    nfs_shared_infodir="/mnt/docker-vol/nfsinfo" \
-    nfs_ip="192.168.10.230"
-    
-pcs resource create virtual_ip IPaddr2 \
-    ip="192.168.10.230" \
-    cidr_netmask="24"
-
-# Configurar dependencias
-pcs constraint colocation add drbd_fs with drbd_resource INFINITY with-rsc-role=Master
-pcs constraint order drbd_resource then drbd_fs
-pcs constraint colocation add nfs_server with virtual_ip INFINITY
-pcs constraint order virtual_ip then nfs_server
+# Sigue la guía general de instalación
+cat docs/INSTALLATION.md
 ```
 
-### 3. Configuración de red del host Docker (Nodo 3)
-
+#### Instalación específica para Proxmox + Debian
 ```bash
-# Configurar interfaces de red en /etc/netplan/01-netcfg.yaml (Ubuntu/Debian con Netplan)
-cat > /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      addresses:
-        - 10.0.0.233/8
-      gateway4: 10.0.0.1
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
-    eth1:
-      addresses:
-        - 192.168.10.233/24
-EOF
-
-# Aplicar configuración de red
-netplan apply
-
-# Verificar configuración
-ip addr show
+# Para entornos virtualizados con Proxmox
+cat docs/PROXMOX_DEBIAN.md
 ```
 
-### 4. Configuración del host Docker
+### 3. Verificación post-instalación
 
 ```bash
-# Instalar Docker en Debian
-# Método recomendado usando el script oficial
-curl -fsSL https://get.docker.com | sh
-systemctl enable docker
-
-# O instalación manual en Debian:
-# apt update
-# apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
-# curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-# echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
-# apt update
-# apt install -y docker-ce docker-ce-cli containerd.io
-
-# Configurar Docker para usar NFS
-mkdir -p /mnt/nfs-docker
-echo "192.168.10.230:/mnt/docker-vol /mnt/nfs-docker nfs defaults,_netdev 0 0" >> /etc/fstab
-mount -a
-
-# Configurar Docker daemon
-cat > /etc/docker/daemon.json << EOF
-{
-    "data-root": "/mnt/nfs-docker/docker",
-    "storage-driver": "overlay2"
-}
-EOF
-
-# Reiniciar Docker
-systemctl restart docker
-```
-
-## Proceso de failover
-
-1. **Detección de falla**: Pacemaker detecta la falla del nodo primario
-2. **Promoción de recursos**: El dispositivo DRBD secundario se promueve a primario
-3. **Montaje del sistema de archivos**: Monta el sistema de archivos en el nuevo nodo primario
-4. **Inicio de servicios**: Inicia el servidor NFS en el nuevo nodo primario
-5. **Migración de IP**: Mueve la IP flotante al nuevo nodo primario
-6. **Reconexión del cliente**: El host Docker se reconecta al nuevo servidor NFS
-
-## Monitoreo y mantenimiento
-
-### Comandos útiles para monitoreo
-
-```bash
-# Estado del clúster DRBD
+# Verificar estado del clúster DRBD
 drbdadm status docker-vol
 
-# Estado del clúster Pacemaker
+# Verificar estado de Pacemaker
 pcs status
 
 # Verificar montajes NFS
 showmount -e 192.168.10.230
 
-# Estado de Docker
+# Verificar Docker
 docker info
-docker system df
 ```
 
-### Procedimientos de mantenimiento
+## ⚡ Proceso de failover automático
 
+La arquitectura implementa un failover completamente automático:
+
+1. 🔍 **Detección de falla** → Pacemaker detecta falla del nodo primario
+2. 🔄 **Promoción de recursos** → DRBD secundario se promueve a primario  
+3. 📁 **Montaje de filesystem** → Sistema de archivos montado en nuevo nodo
+4. 🌐 **Migración de IP flotante** → IP virtual migra al nodo activo
+5. 🔌 **Reconexión automática** → Docker se reconecta transparentemente
+
+**Tiempo de failover típico: 30-60 segundos**
+
+## 🔧 Comandos útiles
+
+### Monitoreo del clúster
 ```bash
-# Modo mantenimiento del clúster
+# Estado general del clúster
+pcs status
+
+# Estado específico de DRBD
+drbdadm status docker-vol
+
+# Verificar servicios NFS
+showmount -e 192.168.10.230
+```
+
+### Mantenimiento
+```bash
+# Modo mantenimiento (standby)
 pcs cluster standby node1
 
-# Sincronización manual DRBD
-drbdadm invalidate docker-vol
+# Salir de modo mantenimiento
+pcs cluster unstandby node1
 
 # Backup de configuración
 pcs config backup cluster-backup.tar.bz2
 ```
 
-## Resolución de problemas
-
-### Problemas comunes
-
-1. **Split-brain de DRBD**: Verificar conectividad de red y resolver manualmente
-2. **Falla de montaje NFS**: Verificar permisos y exportaciones NFS
-3. **Recursos atorados en Pacemaker**: Limpiar recursos con `pcs resource cleanup`
-
-### Logs importantes
-
-```bash
-# Logs de DRBD
-journalctl -u drbd
-
-# Logs de Pacemaker
-journalctl -u pacemaker
-
-# Logs de Docker
-journalctl -u docker
-```
-
-## Consideraciones de seguridad
-
-- Configurar iptables/firewalld para permitir tráfico del clúster
-- Usar autenticación SSH con claves para acceso a nodos
-- Implementar monitoreo de red para detectar intrusiones
-- Configurar backups regulares del almacenamiento DRBD
+Para más detalles sobre monitoreo, mantenimiento y resolución de problemas, consulta la [📖 **guía de instalación**](docs/INSTALLATION.md).
 
 ## Contribuciones
 

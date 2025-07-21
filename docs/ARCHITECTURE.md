@@ -4,33 +4,7 @@
 
 This document describes a high availability storage solution using DRBD (Distributed Replicated Block Device) with Pacemaker cluster management and NFS services for containerized workloads.
 
-## Architecture Components
-
-### Node 1: Primary DRBD Node
-- **Physical Device**: `/dev/sdb1` - Raw block device
-- **DRBD Device**: `/dev/drbd0` - Replicated block device
-- **Mount Point**: `/mnt/docker-vol` - File system mount
-- **NFS Server**: Active NFS service
-- **Floating IP**: `192.168.10.230` - Virtual IP for high availability
-
-### Node 2: Secondary DRBD Node
-- **Physical Device**: `/dev/sdb1` - Raw block device (standby)
-- **DRBD Device**: `/dev/drbd0` - Replicated block device (secondary)
-- **Mount Point**: `/mnt/docker-vol` - File system mount (standby)
-- **NFS Server**: Standby NFS service
-- **Pacemaker**: Standby mode, ready for failover
-
-### Pacemaker Cluster Manager
-- **DRBD Monitoring**: Continuously monitors DRBD resource status
-- **Node Promotion**: Promotes secondary node to primary during failover
-- **IP Management**: Manages floating IP assignment
-- **NFS Management**: Controls active NFS service
-
-### Node 3: Docker Host
-- **NFS Client**: Connects to NFS service via floating IP
-- **Container Storage**: Images and containers are stored on NFS; the Docker server is solely for execution purposes
-
-## Revised Architecture Diagram
+## System Architecture
 
 ```mermaid
 graph TB
@@ -124,15 +98,55 @@ graph TB
     class D1,D2,D3,D4,D5 application
 ```
 
-## Key Improvements in Revised Diagram
+## Architecture Components
 
-1. **Clearer Layer Separation**: Organized into Storage, Cluster Management, and Application layers
-2. **Enhanced Visual Flow**: Better representation of data flow and dependencies
-3. **Explicit Replication**: Clear indication of DRBD data replication between nodes
-4. **Detailed Monitoring**: Shows comprehensive cluster monitoring relationships
-5. **Container Visualization**: Explicit representation of multiple containers
-6. **Status Indication**: Clear primary/secondary role visualization
-7. **Color Coding**: Different colors for different component types
+### Node 1: Primary DRBD Node
+- **Physical Device**: `/dev/sdb1` - Raw block device
+- **DRBD Device**: `/dev/drbd0` - Replicated block device
+- **Mount Point**: `/mnt/docker-vol` - File system mount
+- **NFS Server**: Active NFS service
+- **Floating IP**: `192.168.10.230` - Virtual IP for high availability
+
+### Node 2: Secondary DRBD Node
+- **Physical Device**: `/dev/sdb1` - Raw block device (standby)
+- **DRBD Device**: `/dev/drbd0` - Replicated block device (secondary)
+- **Mount Point**: `/mnt/docker-vol` - File system mount (standby)
+- **NFS Server**: Standby NFS service
+- **Pacemaker**: Standby mode, ready for failover
+
+### Pacemaker Cluster Manager
+- **DRBD Monitoring**: Continuously monitors DRBD resource status
+- **Node Promotion**: Promotes secondary node to primary during failover
+- **IP Management**: Manages floating IP assignment
+- **NFS Management**: Controls active NFS service
+
+### Node 3: Docker Host
+- **NFS Client**: Connects to NFS service via floating IP
+- **Container Storage**: Images and containers stored on NFS
+- **Network Configuration**:
+  - **Primary IP**: `10.0.0.233/8` - Management network
+  - **Secondary IP**: `192.168.10.233/24` - Cluster network
+  - **NFS Access**: Connects to floating IP `192.168.10.230/24`
+
+## Key Design Principles
+
+### Docker Storage Architecture
+**ALL Docker images and containers MUST be stored on the NFS-mounted storage provided by the DRBD cluster.**
+
+#### Storage Components
+- **Docker Images**: Stored in `/mnt/docker-vol/docker/images/` on NFS
+- **Container Data**: All container volumes and persistent data on NFS
+- **Docker Daemon**: Configured to use NFS-mounted directories for:
+  - Image storage
+  - Container runtime data
+  - Volume mounts
+  - Build cache
+
+#### Docker Host Role
+- **Execution Only**: The Docker server (Node 3) serves purely as an execution engine
+- **No Local Storage**: No images or persistent data stored locally
+- **NFS Dependency**: Complete dependency on NFS for all Docker operations
+- **Stateless Operation**: Can be replaced or rebuilt without data loss
 
 ## Failover Process
 
@@ -145,61 +159,46 @@ graph TB
 
 ## Benefits
 
-- **High Availability**: Automatic failover with minimal downtime
-- **Data Consistency**: Synchronous replication ensures data integrity
-- **Transparent Failover**: Applications continue running during failover
-- **Centralized Storage**: Single point of storage management for containers
-- **Scalability**: Easy to add more Docker hosts as NFS clients
+### High Availability Features
+- ✅ **Automatic failover** - Minimal downtime during node failures
+- ✅ **Data consistency** - Synchronous replication ensures integrity
+- ✅ **Transparent failover** - Applications continue during failover
+- ✅ **Centralized storage** - Single storage management point
+- ✅ **Scalability** - Easy addition of Docker execution hosts
 
-## Docker Storage Architecture
-
-### Critical Design Principle
-**ALL Docker images and containers MUST be stored on the NFS-mounted storage provided by the DRBD cluster.**
-
-### Storage Components
-- **Docker Images**: Stored in `/mnt/docker-vol/docker/images/` on NFS
-- **Container Data**: All container volumes and persistent data on NFS
-- **Docker Daemon**: Configured to use NFS-mounted directories for:
-  - Image storage
-  - Container runtime data
-  - Volume mounts
-  - Build cache
-
-### Docker Host Role
-- **Execution Only**: The Docker server (Node 3) serves purely as an execution engine
-- **No Local Storage**: No images or persistent data stored locally
-- **NFS Dependency**: Complete dependency on NFS for all Docker operations
-- **Stateless Operation**: Can be replaced or rebuilt without data loss
-
-### Benefits of NFS-Centralized Storage
+### NFS-Centralized Storage Benefits
 1. **High Availability**: Images and containers survive Docker host failures
 2. **Consistency**: Same images available across multiple Docker hosts
 3. **Backup Simplicity**: Single storage location for all Docker data
 4. **Scalability**: Easy to add more Docker execution hosts
 5. **Disaster Recovery**: Complete Docker environment restoration from DRBD replica
 
-## Configuration Requirements
+## Network Configuration
 
-### DRBD and Pacemaker
-- DRBD resource configuration on both nodes
-- Pacemaker cluster setup with proper fencing
-- NFS server configuration with proper exports
-- Floating IP configuration in cluster
-- Network connectivity between all nodes
+### IP Address Scheme
+- **Node 1 (DRBD Primary)**:
+  - Management: `10.0.0.231/8`
+  - Cluster: `192.168.10.231/24`
+- **Node 2 (DRBD Secondary)**:
+  - Management: `10.0.0.232/8`
+  - Cluster: `192.168.10.232/24`
+- **Node 3 (Docker Host)**:
+  - Management: `10.0.0.233/8`
+  - Cluster: `192.168.10.233/24`
+- **Floating IP**: `192.168.10.230/24` (Virtual IP for HA)
 
-### Docker Host Configuration
-- Docker daemon configured with NFS-mounted data directories:
-  ```json
-  {
-    "data-root": "/mnt/nfs-docker/docker",
-    "storage-driver": "overlay2"
-  }
-  ```
-- NFS mount configuration in `/etc/fstab`:
-  ```
-  192.168.10.230:/mnt/docker-vol /mnt/nfs-docker nfs defaults,_netdev 0 0
-  ```
-- Docker service dependency on NFS mount
+### Network Requirements
+- **Low Latency**: <1ms ideally between DRBD nodes
+- **Dedicated Network**: Separate network for cluster communication
+- **Bandwidth**: Sufficient for Docker image transfers and container data
+
+## Security Considerations
+
+- Configure iptables/firewalld for cluster traffic
+- Use SSH key authentication for node access
+- Implement network monitoring for intrusion detection
+- Regular backup configuration of DRBD storage
+- Secure NFS exports with proper access controls
 
 ---
 
