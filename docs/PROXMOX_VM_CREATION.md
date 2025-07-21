@@ -84,6 +84,7 @@ qm create 232 \
   --agent 1 \
   --bios ovmf \
   --onboot 1
+
 # Configurar orden de boot
 qm set 232 --boot order=scsi0
 
@@ -111,6 +112,7 @@ qm create 233 \
   --agent 1 \
   --bios ovmf \
   --onboot 1
+
 # Configurar orden de boot
 qm set 233 --boot order=scsi0
 
