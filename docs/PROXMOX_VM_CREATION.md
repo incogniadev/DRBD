@@ -37,8 +37,8 @@ ssh root@<proxmox-host-ip>
 ### 2. Crear VM Node1 (DRBD Primario)
 
 ```bash
-# Crear VM con ID 101
-qm create 101 \
+# Crear VM con ID 231
+qm create 231 \
   --name "node1-drbd" \
   --memory 4096 \
   --cores 2 \
@@ -49,23 +49,25 @@ qm create 101 \
   --bootdisk scsi0 \
   --scsi0 local-lvm:24,format=raw \
   --scsi1 local-lvm:16,format=raw \
+  --efidisk0 local-lvm:1,format=raw \
   --net0 virtio,bridge=vmbr2 \
   --net1 virtio,bridge=vmbr2 \
   --agent 1 \
+  --bios ovmf \
   --onboot 1
 
 # Configurar orden de boot
-qm set 101 --boot order=scsi0
+qm set 231 --boot order=scsi0
 
 # Adjuntar ISO de instalación (ajustar path según tu setup)
-qm set 101 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
+qm set 231 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
 ```
 
 ### 3. Crear VM Node2 (DRBD Secundario)
 
 ```bash
-# Crear VM con ID 102
-qm create 102 \
+# Crear VM con ID 232
+qm create 232 \
   --name "node2-drbd" \
   --memory 4096 \
   --cores 2 \
@@ -74,24 +76,26 @@ qm create 102 \
   --ostype l26 \
   --scsihw virtio-scsi-pci \
   --bootdisk scsi0 \
-  --scsi0 local-lvm:20,format=raw \
-  --scsi1 local-lvm:10,format=raw \
+  --scsi0 local-lvm:24,format=raw \
+  --scsi1 local-lvm:16,format=raw \
+  --efidisk0 local-lvm:1,format=raw \
   --net0 virtio,bridge=vmbr2 \
+  --net1 virtio,bridge=vmbr2 \
   --agent 1 \
+  --bios ovmf \
   --onboot 1
-
 # Configurar orden de boot
-qm set 102 --boot order=scsi0
+qm set 232 --boot order=scsi0
 
 # Adjuntar ISO de instalación
-qm set 102 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
+qm set 232 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
 ```
 
 ### 4. Crear VM Node3 (Docker Host)
 
 ```bash
-# Crear VM con ID 103
-qm create 103 \
+# Crear VM con ID 233
+qm create 233 \
   --name "node3-docker" \
   --memory 4096 \
   --cores 2 \
@@ -100,16 +104,18 @@ qm create 103 \
   --ostype l26 \
   --scsihw virtio-scsi-pci \
   --bootdisk scsi0 \
-  --scsi0 local-lvm:30,format=raw \
+  --scsi0 local-lvm:32,format=raw \
+  --efidisk0 local-lvm:1,format=raw \
   --net0 virtio,bridge=vmbr2 \
+  --net1 virtio,bridge=vmbr2 \
   --agent 1 \
+  --bios ovmf \
   --onboot 1
-
 # Configurar orden de boot
-qm set 103 --boot order=scsi0
+qm set 233 --boot order=scsi0
 
 # Adjuntar ISO de instalación
-qm set 103 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
+qm set 233 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
 ```
 
 ### 5. Configurar red adicional para clúster (opcional)
@@ -117,23 +123,20 @@ qm set 103 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
 Si necesitas una segunda interfaz de red para separar tráfico de administración del clúster:
 
 ```bash
-# Agregar segunda interfaz de red a Node1
-qm set 101 --net1 virtio,bridge=vmbr2
-
-# Agregar segunda interfaz de red a Node2
-qm set 102 --net1 virtio,bridge=vmbr2
-
-# Agregar segunda interfaz de red a Node3
-qm set 103 --net1 virtio,bridge=vmbr2
+# Nota: Las interfaces ya están configuradas en el comando de creación
+# Si necesitas modificar las interfaces después de la creación:
+qm set 231 --net1 virtio,bridge=vmbr2
+qm set 232 --net1 virtio,bridge=vmbr2
+qm set 233 --net1 virtio,bridge=vmbr2
 ```
 
 ### 6. Iniciar las VMs
 
 ```bash
 # Iniciar todas las VMs
-qm start 101
-qm start 102
-qm start 103
+qm start 231
+qm start 232
+qm start 233
 
 # Verificar estado
 qm list
@@ -145,11 +148,11 @@ qm list
 
 ```bash
 # Acceder a consola de VM para instalación
-qm monitor 101
+qm monitor 231
 # Seguir proceso de instalación de Debian
 
 # O usar VNC si está disponible
-qm vncproxy 101
+qm vncproxy 231
 ```
 
 ### 2. Configuración de red después de la instalación
