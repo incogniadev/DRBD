@@ -25,18 +25,18 @@ Este documento contiene consideraciones específicas para implementar el laborat
 ```bash
 # Configuración de red dual para cada VM:
 # Docker Host (Node3): 
-#   - eth0: 10.0.0.233/8    (red de administración)
-#   - eth1: 192.168.10.233/24 (red del clúster)
+#   - eth0: 10.0.0.230/8    (internet/WAN)
+#   - eth1: 192.168.10.230/24 (comunicación interna)
 # 
 # DRBD Node1:
-#   - eth0: 10.0.0.231/8    (red de administración) 
-#   - eth1: 192.168.10.231/24 (red del clúster)
+#   - eth0: 10.0.0.231/8    (internet/WAN) 
+#   - eth1: 192.168.10.231/24 (comunicación interna)
 #
 # DRBD Node2:
-#   - eth0: 10.0.0.232/8    (red de administración)
-#   - eth1: 192.168.10.232/24 (red del clúster)
+#   - eth0: 10.0.0.232/8    (internet/WAN)
+#   - eth1: 192.168.10.232/24 (comunicación interna)
 #
-# Floating IP: 192.168.10.230/24 (IP virtual para alta disponibilidad)
+# Floating IP: 192.168.10.100/24 (solo en red interna)
 ```
 
 ## Instalación y configuración específica para Debian
@@ -67,48 +67,12 @@ echo "127.0.1.1 node3-docker" >> /etc/hosts
 cat >> /etc/hosts << EOF
 192.168.10.231    node1
 192.168.10.232    node2  
-192.168.10.233    node3-docker
-192.168.10.230    cluster-vip
+192.168.10.230    node3-docker
+192.168.10.100    cluster-vip
 EOF
 ```
 
-### 2. Configuración de red específica para Node3 Docker
-
-```bash
-# Configuración de red dual para el host Docker (Node3)
-# Crear archivo de configuración Netplan
-cat > /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      addresses:
-        - 10.0.0.233/8
-      gateway4: 10.0.0.1
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
-      routes:
-        - to: default
-          via: 10.0.0.1
-    eth1:
-      addresses:
-        - 192.168.10.233/24
-EOF
-
-# Aplicar configuración
-netplan apply
-
-# Verificar conectividad
-ping -c 3 192.168.10.230  # IP flotante
-ping -c 3 10.0.0.1       # Gateway
-
-# Verificar interfaces
-ip addr show
-ip route show
-```
-
-### 3. Configuración de SSH para el clúster
+### 2. Configuración de SSH para el clúster
 
 ```bash
 # En todos los nodos, generar llaves SSH
@@ -119,7 +83,7 @@ ssh-copy-id node1
 ssh-copy-id node2
 ```
 
-### 4. Instalación específica de DRBD en Debian
+### 3. Instalación específica de DRBD en Debian
 
 ```bash
 # DRBD puede requerir el módulo del kernel
@@ -137,7 +101,7 @@ lsmod | grep drbd
 drbdadm --version
 ```
 
-### 5. Configuración específica de Pacemaker en Debian
+### 4. Configuración específica de Pacemaker en Debian
 
 ```bash
 # Instalar pacemaker y herramientas
@@ -156,7 +120,7 @@ passwd hacluster
 systemctl start pcsd
 ```
 
-### 6. Configuración de firewall (si está habilitado)
+### 5. Configuración de firewall (si está habilitado)
 
 ```bash
 # Si ufw está habilitado, configurar reglas para el clúster

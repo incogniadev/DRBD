@@ -33,7 +33,7 @@ graph TB
             A3["/mnt/docker-vol<br/>Mounted Filesystem"]
             A3a["Docker Images<br/>& Container Data"]
             A4["NFS Server<br/>(Active)"]
-            A5["192.168.10.230<br/>Floating IP"]
+            A5["192.168.10.100<br/>Floating IP"]
         end
         
         subgraph N2 ["Node 2 (Secondary)"]
@@ -123,7 +123,7 @@ graph TB
 - **Dispositivo DRBD**: `/dev/drbd0` - Dispositivo de bloque replicado
 - **Punto de montaje**: `/mnt/docker-vol` - Montaje del sistema de archivos
 - **Servidor NFS**: Servicio NFS activo
-- **IP flotante**: `192.168.10.230` - IP virtual para alta disponibilidad
+- **IP flotante**: `192.168.10.100` - IP virtual para alta disponibilidad
 
 ### Node 2: Nodo DRBD secundario
 - **Dispositivo físico**: `/dev/sdb1` - Dispositivo de bloque raw (standby)
@@ -135,10 +135,6 @@ graph TB
 ### Node 3: Host Docker
 - **Cliente NFS**: Se conecta al servicio NFS vía IP flotante
 - **Almacenamiento de contenedores**: Imágenes y contenedores almacenados en NFS; el servidor Docker es únicamente para ejecución
-- **Configuración de red**:
-  - **IP principal**: `10.0.0.233/8` - Red de administración
-  - **IP secundaria**: `192.168.10.233/24` - Red del clúster
-  - **Acceso NFS**: Conecta a la IP flotante `192.168.10.230/24` para servicios de almacenamiento
 
 ## Requisitos del sistema
 
@@ -227,10 +223,10 @@ pcs resource create drbd_fs Filesystem \
     
 pcs resource create nfs_server nfsserver \
     nfs_shared_infodir="/mnt/docker-vol/nfsinfo" \
-    nfs_ip="192.168.10.230"
+    nfs_ip="192.168.10.100"
     
 pcs resource create virtual_ip IPaddr2 \
-    ip="192.168.10.230" \
+    ip="192.168.10.100" \
     cidr_netmask="24"
 
 # Configurar dependencias
@@ -240,34 +236,7 @@ pcs constraint colocation add nfs_server with virtual_ip INFINITY
 pcs constraint order virtual_ip then nfs_server
 ```
 
-### 3. Configuración de red del host Docker (Nodo 3)
-
-```bash
-# Configurar interfaces de red en /etc/netplan/01-netcfg.yaml (Ubuntu/Debian con Netplan)
-cat > /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      addresses:
-        - 10.0.0.233/8
-      gateway4: 10.0.0.1
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
-    eth1:
-      addresses:
-        - 192.168.10.233/24
-EOF
-
-# Aplicar configuración de red
-netplan apply
-
-# Verificar configuración
-ip addr show
-```
-
-### 4. Configuración del host Docker
+### 3. Configuración del host Docker
 
 ```bash
 # Instalar Docker en Debian
@@ -285,7 +254,7 @@ systemctl enable docker
 
 # Configurar Docker para usar NFS
 mkdir -p /mnt/nfs-docker
-echo "192.168.10.230:/mnt/docker-vol /mnt/nfs-docker nfs defaults,_netdev 0 0" >> /etc/fstab
+echo "192.168.10.100:/mnt/docker-vol /mnt/nfs-docker nfs defaults,_netdev 0 0" >> /etc/fstab
 mount -a
 
 # Configurar Docker daemon
@@ -321,7 +290,7 @@ drbdadm status docker-vol
 pcs status
 
 # Verificar montajes NFS
-showmount -e 192.168.10.230
+showmount -e 192.168.10.100
 
 # Estado de Docker
 docker info

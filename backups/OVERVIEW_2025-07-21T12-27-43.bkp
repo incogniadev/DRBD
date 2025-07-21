@@ -11,7 +11,7 @@ This document describes a high availability storage solution using DRBD (Distrib
 - **DRBD Device**: `/dev/drbd0` - Replicated block device
 - **Mount Point**: `/mnt/docker-vol` - File system mount
 - **NFS Server**: Active NFS service
-- **Floating IP**: `192.168.10.230` - Virtual IP for high availability
+- **Floating IP**: `192.168.1.200` - Virtual IP for high availability
 
 ### Node 2: Secondary DRBD Node
 - **Physical Device**: `/dev/sdb1` - Raw block device (standby)
@@ -41,7 +41,7 @@ graph TB
             A3["/mnt/docker-vol<br/>Mounted Filesystem"]
             A3a["Docker Images<br/>& Container Data"]
             A4["NFS Server<br/>(Active)"]
-            A5["192.168.10.230<br/>Floating IP"]
+            A5["192.168.1.200<br/>Floating IP"]
         end
         
         subgraph N2 ["Node 2 (Secondary)"]
@@ -197,7 +197,7 @@ graph TB
   ```
 - NFS mount configuration in `/etc/fstab`:
   ```
-  192.168.10.230:/mnt/docker-vol /mnt/nfs-docker nfs defaults,_netdev 0 0
+  192.168.1.200:/mnt/docker-vol /mnt/nfs-docker nfs defaults,_netdev 0 0
   ```
 - Docker service dependency on NFS mount
 
