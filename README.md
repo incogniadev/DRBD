@@ -33,7 +33,7 @@ graph TB
             A3["/mnt/docker-vol<br/>Mounted Filesystem"]
             A3a["Docker Images<br/>& Container Data"]
             A4["NFS Server<br/>(Active)"]
-            A5["192.168.1.200<br/>Floating IP"]
+            A5["192.168.10.100<br/>Floating IP"]
         end
         
         subgraph N2 ["Node 2 (Secondary)"]
@@ -123,7 +123,7 @@ graph TB
 - **Dispositivo DRBD**: `/dev/drbd0` - Dispositivo de bloque replicado
 - **Punto de montaje**: `/mnt/docker-vol` - Montaje del sistema de archivos
 - **Servidor NFS**: Servicio NFS activo
-- **IP flotante**: `192.168.1.200` - IP virtual para alta disponibilidad
+- **IP flotante**: `192.168.10.100` - IP virtual para alta disponibilidad
 
 ### Node 2: Nodo DRBD secundario
 - **Dispositivo físico**: `/dev/sdb1` - Dispositivo de bloque raw (standby)
@@ -144,7 +144,7 @@ graph TB
 - **Host Docker**: Servidor con Docker Engine instalado
 
 ### Requisitos de software
-- **Sistema operativo**: Linux (RHEL/CentOS 8+, Ubuntu 20.04+, SLES 15+)
+- **Sistema operativo**: Linux (Debian 11+, Ubuntu 20.04+, RHEL/CentOS 8+, SLES 15+)
 - **DRBD**: Versión 9.x o superior
 - **Pacemaker**: Versión 2.x o superior
 - **Corosync**: Para comunicación del clúster
@@ -156,8 +156,12 @@ graph TB
 ### 1. Preparación de los nodos DRBD
 
 ```bash
-# Instalar DRBD y Pacemaker en ambos nodos
-yum install -y drbd90-kmp-default drbd90-utils pacemaker corosync nfs-utils
+# Para Debian/Ubuntu - Instalar DRBD y Pacemaker en ambos nodos
+apt update
+apt install -y drbd-utils pacemaker corosync nfs-kernel-server nfs-common
+
+# Para RedHat/Fedora/CentOS
+# yum install -y drbd90-kmp-default drbd90-utils pacemaker corosync nfs-utils
 
 # Configurar dispositivo DRBD
 cat > /etc/drbd.d/docker-vol.res << EOF
@@ -168,19 +172,23 @@ resource docker-vol {
     meta-disk internal;
     
     on node1 {
-        address 192.168.1.10:7789;
+        address 192.168.10.231:7789;
     }
     
     on node2 {
-        address 192.168.1.11:7789;
+        address 192.168.10.232:7789;
     }
 }
 EOF
 
 # Crear metadata y inicializar DRBD
 drbdadm create-md docker-vol
+# En Debian, el servicio puede llamarse drbd o drbd9
 systemctl enable drbd
 systemctl start drbd
+# Si el servicio anterior falla, intenta con:
+# systemctl enable drbd9
+# systemctl start drbd9
 
 # En el nodo primario solamente
 drbdadm primary docker-vol --force
@@ -191,6 +199,13 @@ mkfs.ext4 /dev/drbd0
 
 ```bash
 # Configurar Pacemaker en ambos nodos
+# Primero instalar pcs si no está disponible
+apt install -y pcs
+
+# Configurar contraseña para usuario hacluster
+passwd hacluster
+
+# Autenticar nodos
 pcs host auth node1 node2
 pcs cluster setup docker-cluster node1 node2
 pcs cluster start --all
@@ -208,10 +223,10 @@ pcs resource create drbd_fs Filesystem \
     
 pcs resource create nfs_server nfsserver \
     nfs_shared_infodir="/mnt/docker-vol/nfsinfo" \
-    nfs_ip="192.168.1.200"
+    nfs_ip="192.168.10.100"
     
 pcs resource create virtual_ip IPaddr2 \
-    ip="192.168.1.200" \
+    ip="192.168.10.100" \
     cidr_netmask="24"
 
 # Configurar dependencias
@@ -224,13 +239,22 @@ pcs constraint order virtual_ip then nfs_server
 ### 3. Configuración del host Docker
 
 ```bash
-# Instalar Docker
+# Instalar Docker en Debian
+# Método recomendado usando el script oficial
 curl -fsSL https://get.docker.com | sh
 systemctl enable docker
 
+# O instalación manual en Debian:
+# apt update
+# apt install -y apt-transport-https ca-certificates curl gnupg lsb-release
+# curl -fsSL https://download.docker.com/linux/debian/gpg | gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+# echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/debian $(lsb_release -cs) stable" | tee /etc/apt/sources.list.d/docker.list > /dev/null
+# apt update
+# apt install -y docker-ce docker-ce-cli containerd.io
+
 # Configurar Docker para usar NFS
 mkdir -p /mnt/nfs-docker
-echo "192.168.1.200:/mnt/docker-vol /mnt/nfs-docker nfs defaults,_netdev 0 0" >> /etc/fstab
+echo "192.168.10.100:/mnt/docker-vol /mnt/nfs-docker nfs defaults,_netdev 0 0" >> /etc/fstab
 mount -a
 
 # Configurar Docker daemon
@@ -266,7 +290,7 @@ drbdadm status docker-vol
 pcs status
 
 # Verificar montajes NFS
-showmount -e 192.168.1.200
+showmount -e 192.168.10.100
 
 # Estado de Docker
 docker info
