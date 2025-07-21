@@ -8,7 +8,7 @@
 - **Host Docker**: Servidor con Docker Engine instalado
 
 ### Requisitos de software
-- **Sistema operativo**: Linux (Debian 11+, Ubuntu 20.04+, RHEL/CentOS 8+, SLES 15+)
+- **Sistema operativo**: Linux (Debian 12.11+, Ubuntu 22.04+, RHEL/CentOS 9+, SLES 15+)
 - **DRBD**: Versión 9.x o superior
 - **Pacemaker**: Versión 2.x o superior
 - **Corosync**: Para comunicación del clúster

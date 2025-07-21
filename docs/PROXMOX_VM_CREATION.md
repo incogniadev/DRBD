@@ -5,7 +5,7 @@ Esta guía describe cómo crear las máquinas virtuales necesarias para el labor
 ## Requisitos previos
 
 - Acceso SSH a Proxmox host
-- Template o ISO de Debian 11+ disponible
+- Template o ISO de Debian 12.11+ disponible
 - Red bridge `vmbr2` configurada
 - Espacio suficiente en almacenamiento
 
@@ -17,14 +17,14 @@ Esta guía describe cómo crear las máquinas virtuales necesarias para el labor
 - **Disco principal**: 24GB (sistema operativo)
 - **Disco secundario**: 16GB (DRBD storage)
 - **Red**: 2x vmbr2 (administración + clúster)
-- **OS**: Debian 11+
+- **OS**: Debian 12.11+
 
 ### Host Docker (Node3)
 - **CPU**: 2 vCPUs
 - **RAM**: 4GB
 - **Disco**: 32GB (sistema + contenedores)
 - **Red**: 2x vmbr2 (administración + clúster)
-- **OS**: Debian 11+
+- **OS**: Debian 12.11+
 
 ## Creación de VMs desde shell de Proxmox
 
@@ -60,7 +60,7 @@ qm create 231 \
 qm set 231 --boot order=scsi0
 
 # Adjuntar ISO de instalación (ajustar path según tu setup)
-qm set 231 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
+qm set 231 --cdrom local:iso/debian-12.11.0-amd64-netinst.iso
 ```
 
 ### 3. Crear VM Node2 (DRBD Secundario)
@@ -88,7 +88,7 @@ qm create 232 \
 qm set 232 --boot order=scsi0
 
 # Adjuntar ISO de instalación
-qm set 232 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
+qm set 232 --cdrom local:iso/debian-12.11.0-amd64-netinst.iso
 ```
 
 ### 4. Crear VM Node3 (Docker Host)
@@ -115,7 +115,7 @@ qm create 233 \
 qm set 233 --boot order=scsi0
 
 # Adjuntar ISO de instalación
-qm set 233 --cdrom local:iso/debian-11.6.0-amd64-netinst.iso
+qm set 233 --cdrom local:iso/debian-12.11.0-amd64-netinst.iso
 ```
 
 ### 5. Configurar red adicional para clúster (opcional)
@@ -248,7 +248,7 @@ EOF
 # create-drbd-vms.sh
 
 # Variables
-ISO_PATH="local:iso/debian-11.6.0-amd64-netinst.iso"
+ISO_PATH="local:iso/debian-12.11.0-amd64-netinst.iso"
 STORAGE="local-lvm"
 
 echo "Creando VM Node1 (DRBD Primario)..."

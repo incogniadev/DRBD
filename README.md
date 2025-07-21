@@ -73,7 +73,7 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 
 | Componente | Versión | Notas |
 |------------|---------|-------|
-| **Linux OS** | Debian 11+, Ubuntu 20.04+, RHEL/CentOS 8+ | - |
+|| **Linux OS** | Debian 12.11+, Ubuntu 22.04+, RHEL/CentOS 9+ | - |
 | **DRBD** | 9.x+ | Con módulos del kernel |
 | **Pacemaker** | 2.x+ | Gestión de clúster |
 | **Corosync** | Compatible con Pacemaker | Comunicación del clúster |

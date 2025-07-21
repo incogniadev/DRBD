@@ -30,6 +30,8 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Actualizados IDs de máquinas virtuales para coincidir con último octeto de IP (231, 232, 233)
 - 2025-07-21: Configurada doble interfaz de red usando bridge vmbr2 para administración y clúster
 - 2025-07-21: Añadido soporte completo para UEFI con disco EFI y QEMU Agent en todas las VMs
+- 2025-07-21: Actualizada documentación para usar Debian 12.11 en lugar de versiones anteriores
+- 2025-07-21: Actualizada imagen ISO de instalación a debian-12.11.0-amd64-netinst.iso en toda la documentación
 - 2025-07-21: Actualizadas especificaciones de disco en VMs: Nodos DRBD a 24GB/16GB y Node Docker a 32GB
 - 2025-07-21: Actualizados IDs de máquinas virtuales para coincidir con último octeto de IP (231, 232, 233)
 - 2025-07-21: Configurada doble interfaz de red usando bridge vmbr2 para administración y clúster
