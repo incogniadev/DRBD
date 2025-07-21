@@ -26,6 +26,14 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Añadido ejemplo de configuración de Netplan para la configuración de red de Node 3
 - 2025-07-21: Actualizadas todas las referencias de montaje NFS para usar la nueva IP flotante 192.168.10.230
 - 2025-07-21: Actualizado PROXMOX_DEBIAN_NOTES.md con nuevas configuraciones de IP y configuración de red específica de Node3 Docker
+- 2025-07-21: Actualizadas especificaciones de disco en VMs: Nodos DRBD a 24GB/16GB y Node Docker a 32GB
+- 2025-07-21: Actualizados IDs de máquinas virtuales para coincidir con último octeto de IP (231, 232, 233)
+- 2025-07-21: Configurada doble interfaz de red usando bridge vmbr2 para administración y clúster
+- 2025-07-21: Añadido soporte completo para UEFI con disco EFI y QEMU Agent en todas las VMs
+- 2025-07-21: Actualizadas especificaciones de disco en VMs: Nodos DRBD a 24GB/16GB y Node Docker a 32GB
+- 2025-07-21: Actualizados IDs de máquinas virtuales para coincidir con último octeto de IP (231, 232, 233)
+- 2025-07-21: Configurada doble interfaz de red usando bridge vmbr2 para administración y clúster
+- 2025-07-21: Añadido soporte completo para UEFI con disco EFI y QEMU Agent en todas las VMs
 
 ### Eliminado
 - 2025-07-21: Eliminado archivo redundante OVERVIEW.md (contenido movido a docs/ARCHITECTURE.md)
