@@ -292,4 +292,4 @@ exportfs -v
 ---
 
 **Autor**: Rodrigo Álvarez (@incogniadev)  
-**Fecha**: $(date +%Y-%m-%d)
+**Fecha**: 2025-07-21
