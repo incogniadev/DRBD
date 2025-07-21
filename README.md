@@ -1,4 +1,4 @@
-# DRBD High Availability Storage for Docker
+# Almacenamiento de alta disponibilidad DRBD para Docker
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![DRBD Version](https://img.shields.io/badge/DRBD-9.x-green.svg)](https://linbit.com/drbd/)
