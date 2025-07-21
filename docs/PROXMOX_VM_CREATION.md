@@ -38,23 +38,7 @@ ssh root@<proxmox-host-ip>
 
 ```bash
 # Crear VM con ID 231
-qm create 231 \
-  --name "node1-drbd" \
-  --memory 4096 \
-  --cores 2 \
-  --sockets 1 \
-  --cpu host \
-  --ostype l26 \
-  --scsihw virtio-scsi-pci \
-  --bootdisk scsi0 \
-  --scsi0 local-lvm:24,format=raw \
-  --scsi1 local-lvm:16,format=raw \
-  --efidisk0 local-lvm:1,format=raw \
-  --net0 virtio,bridge=vmbr2 \
-  --net1 virtio,bridge=vmbr2 \
-  --agent 1 \
-  --bios ovmf \
-  --onboot 1
+qm create 231 --name "node1-drbd" --memory 4096 --cores 2 --sockets 1 --cpu host --ostype l26 --scsihw virtio-scsi-pci --bootdisk scsi0 --scsi0 local-lvm:24,format=raw --scsi1 local-lvm:16,format=raw --efidisk0 local-lvm:1,format=raw --net0 virtio,bridge=vmbr2 --net1 virtio,bridge=vmbr2 --agent 1 --bios ovmf --onboot 1
 
 # Configurar orden de boot
 qm set 231 --boot order=scsi0
@@ -67,23 +51,7 @@ qm set 231 --cdrom local:iso/debian-12.11.0-amd64-netinst.iso
 
 ```bash
 # Crear VM con ID 232
-qm create 232 \
-  --name "node2-drbd" \
-  --memory 4096 \
-  --cores 2 \
-  --sockets 1 \
-  --cpu host \
-  --ostype l26 \
-  --scsihw virtio-scsi-pci \
-  --bootdisk scsi0 \
-  --scsi0 local-lvm:24,format=raw \
-  --scsi1 local-lvm:16,format=raw \
-  --efidisk0 local-lvm:1,format=raw \
-  --net0 virtio,bridge=vmbr2 \
-  --net1 virtio,bridge=vmbr2 \
-  --agent 1 \
-  --bios ovmf \
-  --onboot 1
+qm create 232 --name "node2-drbd" --memory 4096 --cores 2 --sockets 1 --cpu host --ostype l26 --scsihw virtio-scsi-pci --bootdisk scsi0 --scsi0 local-lvm:24,format=raw --scsi1 local-lvm:16,format=raw --efidisk0 local-lvm:1,format=raw --net0 virtio,bridge=vmbr2 --net1 virtio,bridge=vmbr2 --agent 1 --bios ovmf --onboot 1
 
 # Configurar orden de boot
 qm set 232 --boot order=scsi0
@@ -96,22 +64,7 @@ qm set 232 --cdrom local:iso/debian-12.11.0-amd64-netinst.iso
 
 ```bash
 # Crear VM con ID 233
-qm create 233 \
-  --name "node3-docker" \
-  --memory 4096 \
-  --cores 2 \
-  --sockets 1 \
-  --cpu host \
-  --ostype l26 \
-  --scsihw virtio-scsi-pci \
-  --bootdisk scsi0 \
-  --scsi0 local-lvm:32,format=raw \
-  --efidisk0 local-lvm:1,format=raw \
-  --net0 virtio,bridge=vmbr2 \
-  --net1 virtio,bridge=vmbr2 \
-  --agent 1 \
-  --bios ovmf \
-  --onboot 1
+qm create 233 --name "node3-docker" --memory 4096 --cores 2 --sockets 1 --cpu host --ostype l26 --scsihw virtio-scsi-pci --bootdisk scsi0 --scsi0 local-lvm:32,format=raw --efidisk0 local-lvm:1,format=raw --net0 virtio,bridge=vmbr2 --net1 virtio,bridge=vmbr2 --agent 1 --bios ovmf --onboot 1
 
 # Configurar orden de boot
 qm set 233 --boot order=scsi0
