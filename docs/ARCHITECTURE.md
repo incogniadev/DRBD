@@ -1,46 +1,46 @@
-# DRBD High Availability Architecture
+# Arquitectura de alta disponibilidad DRBD
 
-## Overview
+## Descripción general
 
-This document describes a high availability storage solution using DRBD (Distributed Replicated Block Device) with Pacemaker cluster management and NFS services for containerized workloads.
+Este documento describe una solución de almacenamiento de alta disponibilidad utilizando DRBD (Distributed Replicated Block Device) con gestión de clúster Pacemaker y servicios NFS para cargas de trabajo en contenedores.
 
-## System Architecture
+## Arquitectura del sistema
 
 ```mermaid
 graph TB
     subgraph "Storage Layer"
-        subgraph N1 ["Node 1 (Primary)"]
-            A1["/dev/sdb1<br/>Physical Device"]
-            A2["/dev/drbd0<br/>DRBD Primary"]
-            A3["/mnt/docker-vol<br/>Mounted Filesystem"]
-            A3a["Docker Images<br/>& Container Data"]
-            A4["NFS Server<br/>(Active)"]
-            A5["192.168.10.230<br/>Floating IP"]
+        subgraph N1 ["Nodo 1 (Primario)"]
+            A1["/dev/sdb1<br/>Dispositivo físico"]
+            A2["/dev/drbd0<br/>DRBD primario"]
+            A3["/mnt/docker-vol<br/>Sistema de archivos montado"]
+            A3a["Imágenes Docker<br/>y datos de contenedores"]
+            A4["Servidor NFS<br/>(Activo)"]
+            A5["192.168.10.230<br/>IP flotante"]
         end
         
-        subgraph N2 ["Node 2 (Secondary)"]
-            B1["/dev/sdb1<br/>Physical Device"]
-            B2["/dev/drbd0<br/>DRBD Secondary"]
-            B3["/mnt/docker-vol<br/>Unmounted"]
-            B3a["Docker Images<br/>& Container Data<br/>(Replica)"]
-            B4["NFS Server<br/>(Standby)"]
-            B5["Pacemaker Agent<br/>(Standby)"]
+        subgraph N2 ["Nodo 2 (Secundario)"]
+            B1["/dev/sdb1<br/>Dispositivo físico"]
+            B2["/dev/drbd0<br/>DRBD secundario"]
+            B3["/mnt/docker-vol<br/>Desmontado"]
+            B3a["Imágenes Docker<br/>y datos de contenedores<br/>(Réplica)"]
+            B4["Servidor NFS<br/>(En espera)"]
+            B5["Agente Pacemaker<br/>(En espera)"]
         end
     end
     
-    subgraph "Cluster Management"
-        C1["Pacemaker Cluster"]
-        C2["Resource Monitor"]
-        C3["Failover Controller"]
-        C4["IP Manager"]
+    subgraph "Gestión del clúster"
+        C1["Clúster Pacemaker"]
+        C2["Monitor de recursos"]
+        C3["Controlador de failover"]
+        C4["Gestor de IP"]
     end
     
-    subgraph "Application Layer"
-        D1["Docker Host<br/>Node 3"]
-        D2["NFS Client"]
-        D3["Container 1"]
-        D4["Container 2"]
-        D5["Container N"]
+    subgraph "Capa de aplicación"
+        D1["Host Docker<br/>Nodo 3"]
+        D2["Cliente NFS"]
+        D3["Contenedor 1"]
+        D4["Contenedor 2"]
+        D5["Contenedor N"]
     end
     
     %% Storage flow
@@ -55,36 +55,36 @@ graph TB
     B3 --> B3a
     B3a --> B4
     
-    %% DRBD replication
-    A2 -.->|"Data Replication"| B2
+    %% Replicación DRBD
+    A2 -.->|"Replicación de datos"| B2
     
-    %% Pacemaker management
+    %% Gestión Pacemaker
     C1 --> C2
     C2 --> C3
     C3 --> C4
     
-    %% Cluster monitoring
-    C2 -.->|"Monitor"| A2
-    C2 -.->|"Monitor"| B2
-    C2 -.->|"Monitor"| A4
-    C2 -.->|"Monitor"| B4
+    %% Monitoreo del clúster
+    C2 -.->|"Monitorear"| A2
+    C2 -.->|"Monitorear"| B2
+    C2 -.->|"Monitorear"| A4
+    C2 -.->|"Monitorear"| B4
     
-    %% Failover control
-    C3 -.->|"Promote/Demote"| A2
-    C3 -.->|"Promote/Demote"| B2
-    C3 -.->|"Start/Stop"| A4
-    C3 -.->|"Start/Stop"| B4
-    C4 -.->|"Manage"| A5
+    %% Control de failover
+    C3 -.->|"Promover/Degradar"| A2
+    C3 -.->|"Promover/Degradar"| B2
+    C3 -.->|"Iniciar/Detener"| A4
+    C3 -.->|"Iniciar/Detener"| B4
+    C4 -.->|"Gestionar"| A5
     
-    %% Application access
+    %% Acceso de aplicación
     D1 --> D2
-    D2 -->|"NFS Mount"| A5
+    D2 -->|"Montaje NFS"| A5
     D2 --> D3
     D2 --> D4
     D2 --> D5
     
-    %% Standby reporting
-    B5 -.->|"Status Report"| C1
+    %% Reporte de standby
+    B5 -.->|"Reporte de estado"| C1
     
     %% Styling
     classDef primary fill:#e1f5fe,stroke:#01579b,stroke-width:2px

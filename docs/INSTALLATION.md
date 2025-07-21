@@ -1,32 +1,32 @@
-# DRBD High Availability Installation Guide
+# Guía de instalación de alta disponibilidad DRBD
 
-## Prerequisites
+## Requisitos previos
 
-### Hardware Requirements
-- **DRBD Nodes**: Minimum 2 nodes with local storage
-- **Dedicated Network**: Low-latency network connection between DRBD nodes
-- **Docker Host**: Server with Docker Engine installed
+### Requisitos de hardware
+- **Nodos DRBD**: Mínimo 2 nodos con almacenamiento local
+- **Red dedicada**: Conexión de red de baja latencia entre nodos DRBD
+- **Host Docker**: Servidor con Docker Engine instalado
 
-### Software Requirements
-- **Operating System**: Linux (Debian 11+, Ubuntu 20.04+, RHEL/CentOS 8+, SLES 15+)
-- **DRBD**: Version 9.x or higher
-- **Pacemaker**: Version 2.x or higher
-- **Corosync**: For cluster communication
-- **NFS Utils**: For NFS services
-- **Docker**: Version 20.x or higher
+### Requisitos de software
+- **Sistema operativo**: Linux (Debian 11+, Ubuntu 20.04+, RHEL/CentOS 8+, SLES 15+)
+- **DRBD**: Versión 9.x o superior
+- **Pacemaker**: Versión 2.x o superior
+- **Corosync**: Para comunicación del clúster
+- **NFS Utils**: Para servicios NFS
+- **Docker**: Versión 20.x o superior
 
-## General Installation Steps
+## Pasos generales de instalación
 
-### 1. DRBD Node Preparation
+### 1. Preparación de nodos DRBD
 
 ```bash
-# Update system
+# Actualizar sistema
 apt update && apt upgrade -y
 
-# Install required packages
+# Instalar paquetes requeridos
 apt install -y drbd-utils pacemaker corosync nfs-kernel-server nfs-common
 
-# Configure DRBD resource
+# Configurar el recurso DRBD
 cat > /etc/drbd.d/docker-vol.res << EOF
 resource docker-vol {
     protocol C;
@@ -44,32 +44,32 @@ resource docker-vol {
 }
 EOF
 
-# Initialize DRBD
+# Inicializar DRBD
 drbdadm create-md docker-vol
 systemctl enable drbd
 systemctl start drbd
 
-# On primary node only
+# Solo en el nodo primario
 drbdadm primary docker-vol --force
 mkfs.ext4 /dev/drbd0
 ```
 
-### 2. Pacemaker Cluster Configuration
+### 2. Configuración del clúster Pacemaker
 
 ```bash
-# Install pcs
+# Instalar pcs
 apt install -y pcs
 
-# Configure hacluster password
+# Configurar contraseña para hacluster
 passwd hacluster
 
-# Authenticate nodes
+# Autenticar nodos
 pcs host auth node1 node2
 pcs cluster setup docker-cluster node1 node2
 pcs cluster start --all
 pcs cluster enable --all
 
-# Create resources
+# Crear recursos
 pcs resource create drbd_resource ocf:linbit:drbd \
     drbd_resource=docker-vol \
     op monitor interval=60s
@@ -87,26 +87,26 @@ pcs resource create virtual_ip IPaddr2 \
     ip="192.168.10.230" \
     cidr_netmask="24"
 
-# Configure dependencies
+# Configurar dependencias
 pcs constraint colocation add drbd_fs with drbd_resource INFINITY with-rsc-role=Master
 pcs constraint order drbd_resource then drbd_fs
 pcs constraint colocation add nfs_server with virtual_ip INFINITY
 pcs constraint order virtual_ip then nfs_server
 ```
 
-### 3. Docker Host Configuration
+### 3. Configuración del host Docker
 
 ```bash
-# Install Docker
+# Instalar Docker
 curl -fsSL https://get.docker.com | sh
 systemctl enable docker
 
-# Configure NFS mount
+# Configurar montaje NFS
 mkdir -p /mnt/nfs-docker
 echo "192.168.10.230:/mnt/docker-vol /mnt/nfs-docker nfs defaults,_netdev 0 0" >> /etc/fstab
 mount -a
 
-# Configure Docker daemon
+# Configurar el daemon de Docker
 cat > /etc/docker/daemon.json << EOF
 {
     "data-root": "/mnt/nfs-docker/docker",
@@ -114,63 +114,63 @@ cat > /etc/docker/daemon.json << EOF
 }
 EOF
 
-# Restart Docker
+# Reiniciar Docker
 systemctl restart docker
 ```
 
-## Monitoring and Maintenance
+## Monitoreo y Mantenimiento
 
-### Useful Commands
+### Comandos útiles
 
 ```bash
-# DRBD cluster status
+# Estado del clúster DRBD
 drbdadm status docker-vol
 
-# Pacemaker cluster status
+# Estado del clúster Pacemaker
 pcs status
 
-# Verify NFS mounts
+# Verificar montajes NFS
 showmount -e 192.168.10.230
 
-# Docker status
+# Estado de Docker
 docker info
 docker system df
 ```
 
-### Maintenance Procedures
+### Procedimientos de mantenimiento
 
 ```bash
-# Cluster maintenance mode
+# Modo de mantenimiento del clúster
 pcs cluster standby node1
 
-# Manual DRBD synchronization
+# Sincronización manual DRBD
 drbdadm invalidate docker-vol
 
-# Configuration backup
+# Respaldo de configuración
 pcs config backup cluster-backup.tar.bz2
 ```
 
-## Troubleshooting
+## Resolución de problemas
 
-### Common Issues
+### Problemas comunes
 
-1. **DRBD Split-brain**: Check network connectivity and resolve manually
-2. **NFS Mount Failure**: Verify permissions and NFS exports
-3. **Stuck Pacemaker Resources**: Clean resources with `pcs resource cleanup`
+1. **División de cerebro en DRBD**: Verificar conectividad de red y resolver manualmente
+2. **Falla de montaje NFS**: Verificar permisos y exportaciones NFS
+3. **Recursos de Pacemaker atascados**: Limpiar recursos con `pcs resource cleanup`
 
-### Important Logs
+### Logs importantes
 
 ```bash
-# DRBD logs
+# Logs de DRBD
 journalctl -u drbd
 
-# Pacemaker logs
+# Logs de Pacemaker
 journalctl -u pacemaker
 
-# Docker logs
+# Logs de Docker
 journalctl -u docker
 ```
 
 ---
 
-*For platform-specific installation instructions, see the dedicated guides in the docs/ directory.*
+*Para instrucciones de instalación específicas de la plataforma, consulte las guías dedicadas en el directorio de documentación.*
