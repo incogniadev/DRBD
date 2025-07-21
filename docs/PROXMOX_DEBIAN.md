@@ -4,6 +4,11 @@ Esta guía cubre la implementación específica del laboratorio DRBD en un entor
 
 ## Configuración de máquinas virtuales en Proxmox
 
+### Imagen ISO requerida
+- **Sistema operativo**: Debian 12.11 net install
+- **Fuente de descarga**: https://cdimage.debian.org/debian-cd/current/amd64/iso-cd/
+- **Archivo ISO**: `debian-12.11.0-amd64-netinst.iso`
+
 ### Especificaciones recomendadas para VMs
 
 #### Nodos DRBD (Node1 y Node2)
@@ -12,7 +17,7 @@ Esta guía cubre la implementación específica del laboratorio DRBD en un entor
 - **Disco principal**: 20GB para el sistema operativo
 - **Disco secundario**: 10GB adicional para DRBD (será `/dev/sdb`)
 - **Red**: Conectar a la misma red virtual (ej: vmbr0)
-- **OS**: Debian 11 o superior
+- **OS**: Debian 12.11 net install
 
 #### Host Docker (Node3)
 - **CPU**: 2 vCPUs mínimo  

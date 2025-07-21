@@ -14,16 +14,16 @@ Esta guía describe cómo crear las máquinas virtuales necesarias para el labor
 ### Nodos DRBD (Node1 y Node2)
 - **CPU**: 2 vCPUs
 - **RAM**: 4GB 
-- **Disco principal**: 20GB (sistema operativo)
-- **Disco secundario**: 10GB (DRBD storage)
-- **Red**: vmbr2
+- **Disco principal**: 24GB (sistema operativo)
+- **Disco secundario**: 16GB (DRBD storage)
+- **Red**: 2x vmbr2 (administración + clúster)
 - **OS**: Debian 11+
 
 ### Host Docker (Node3)
 - **CPU**: 2 vCPUs
 - **RAM**: 4GB
-- **Disco**: 30GB (sistema + contenedores)
-- **Red**: vmbr2
+- **Disco**: 32GB (sistema + contenedores)
+- **Red**: 2x vmbr2 (administración + clúster)
 - **OS**: Debian 11+
 
 ## Creación de VMs desde shell de Proxmox
@@ -47,9 +47,10 @@ qm create 101 \
   --ostype l26 \
   --scsihw virtio-scsi-pci \
   --bootdisk scsi0 \
-  --scsi0 local-lvm:20,format=raw \
-  --scsi1 local-lvm:10,format=raw \
+  --scsi0 local-lvm:24,format=raw \
+  --scsi1 local-lvm:16,format=raw \
   --net0 virtio,bridge=vmbr2 \
+  --net1 virtio,bridge=vmbr2 \
   --agent 1 \
   --onboot 1
 
