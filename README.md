@@ -16,6 +16,8 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 
 ## Últimos cambios
 
+**Última actualización:** 2025-07-23
+
 - ✅ **Corrección integral de inconsistencias** - Unificación del esquema de red y especificaciones
 - ✅ **Documentación de vmbr2** - Explicación completa de configuración de red dedicada
 - ✅ **Especificaciones unificadas** - Hardware consolidado a 4GB RAM en todos los nodos
