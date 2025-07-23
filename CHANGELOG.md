@@ -5,6 +5,18 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-07-23: **Documentación integral mejorada con guías paso a paso ordenadas**
+  - Añadida guía ordenada y paso a paso en README.md para implementación secuencial correcta
+  - Expandida docs/DOCKER_WEBAPP_DEPLOYMENT.md con ejemplo completo HTML dinámico y scripts de automatización
+  - Renovada completamente docs/DRBD_FAILOVER_TEST.md con 10 secciones estructuradas y matriz de pruebas
+- 2025-07-23: **Scripts de automatización y monitoreo avanzados**
+  - Scripts de despliegue rápido y verificación para WebApp Docker con NFS
+  - Scripts de monitoreo automatizado en tiempo real para pruebas de failover
+  - Script principal comprensivo con menú interactivo para diferentes tipos de pruebas
+- 2025-07-23: **Herramientas de resolución de problemas y documentación práctica**
+  - Sección comprehensiva de troubleshooting con comandos específicos
+  - Criterios de éxito específicos con métricas de tiempo para validación
+  - Matriz de pruebas para documentar resultados de diferentes escenarios
 - 2025-07-23: Guías específicas de despliegue y pruebas de failover
   - Creada docs/DOCKER_WEBAPP_DEPLOYMENT.md para despliegue de WebApp con Docker y NFS
   - Creada docs/DRBD_FAILOVER_TEST.md para pruebas completas de failover del clúster

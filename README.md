@@ -170,4 +170,6 @@ Diseño de arquitectura por Rodrigo Ernesto Álvarez Aguilera (@incogniadev) - I
 
 ---
 
+**📅 Última actualización**: 2025-07-23 - Documentación integral mejorada con guías paso a paso y scripts de automatización
+
 *Esta arquitectura proporciona una base robusta para cargas de trabajo containerizadas que requieren almacenamiento persistente y altamente disponible.*
