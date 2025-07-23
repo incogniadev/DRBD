@@ -276,6 +276,8 @@ sudo ./config-network.sh
 - 🌐 **Notación CIDR:** Solicita IP en formato moderno (ej: 192.168.1.100/24)
 - 🧠 **Cálculo automático:** Calcula máscara de subred desde el prefijo CIDR con formato correcto
 - 🎯 **Inferencia de gateway:** Propone automáticamente el gateway de la red
+- 🔗 **Interfaz secundaria (NUEVA):** Configuración opcional de segunda interfaz de red para laboratorios DRBD
+- 🖧 **Detección automática:** Identifica interfaces de red disponibles o usa valores predeterminados
 - 📊 **Validación automática:** Verifica formato CIDR, IP y nombre de host
 - 💾 **Respaldos automáticos:** Crea copias de seguridad antes de aplicar cambios
 - 🔄 **Aplicación inmediata:** Configura /etc/network/interfaces, /etc/hosts y hostname
@@ -285,7 +287,7 @@ sudo ./config-network.sh
 - 🔄 **Reinicio opcional:** Pregunta si deseas reiniciar inmediatamente
 - 🐛 **Corrección de formato:** Soluciona problemas de formato en máscaras de subred (/8, /16, /24)
 
-**Ejemplo de uso:**
+**Ejemplo de uso básico:**
 
 ```bash
 incognia@preseed:~$ sudo ./config-network.sh
@@ -306,6 +308,9 @@ Gateway (presiona Enter para usar 192.168.1.1):
 Nuevo hostname (ej: servidor01): debian-srv01
 Dominio (presiona Enter para usar faraday.org.mx): 
 
+Configuración de interfaz secundaria (opcional):
+¿Deseas configurar una segunda interfaz de red? (s/N): N
+
 Resumen de cambios:
 Nueva IP: 192.168.1.50
 Gateway: 192.168.1.1
@@ -317,7 +322,57 @@ FQDN: debian-srv01.faraday.org.mx
 ¿Aplicar estos cambios? (s/N): s
 ```
 
+**Ejemplo de uso con interfaz secundaria (para laboratorio DRBD):**
+
+```bash
+incognia@preseed:~$ sudo ./config-network.sh
+
+# ... configuración de interfaz primaria ...
+
+Configuración de interfaz secundaria (opcional):
+¿Deseas configurar una segunda interfaz de red? (s/N): s
+IP secundaria con prefijo CIDR (formato: 192.168.10.100/24): 192.168.10.231/24
+✓ Interfaz secundaria detectada: ens19
+
+Resumen de cambios:
+Nueva IP: 10.0.0.231/8
+Gateway: 10.0.0.1
+Máscara: 255.0.0.0
+Nuevo hostname: node1
+Dominio: faraday.org.mx
+FQDN: node1.faraday.org.mx
+IP secundaria: 192.168.10.231
+Máscara secundaria: 255.255.255.0
+Interfaz secundaria: ens19
+
+¿Aplicar estos cambios? (s/N): s
+```
+
 El script creará automáticamente un directorio de respaldo con timestamp y aplicará todas las configuraciones de forma segura.
+
+### Configuración de doble interfaz para laboratorios DRBD
+
+El script `config-network.sh` incluye soporte especializado para configurar múltiples interfaces de red, ideal para laboratorios de alta disponibilidad como DRBD donde se requiere separar el tráfico de administración del tráfico del clúster.
+
+**Casos de uso comunes:**
+- **Interfaz primaria (`ens18`):** Red de administración/acceso general
+- **Interfaz secundaria (`ens19`):** Red dedicada del clúster DRBD
+
+**Características de la configuración dual:**
+- 🔍 **Detección automática:** Identifica interfaces disponibles en el sistema
+- 🎯 **Configuración simplificada:** Solo requiere IP/máscara para la interfaz secundaria (sin gateway)
+- 📋 **Configuración completa:** Genera `/etc/network/interfaces` con ambas interfaces
+- 🔗 **SSH dual:** Proporciona comandos de conexión para ambas interfaces
+
+**Configuración típica para nodos DRBD:**
+
+| Nodo | Interfaz Primaria | Interfaz Secundaria |
+|------|-------------------|---------------------|
+| node1 | 10.0.0.231/8 | 192.168.10.231/24 |
+| node2 | 10.0.0.232/8 | 192.168.10.232/24 |
+| node3 | 10.0.0.233/8 | 192.168.10.233/24 |
+
+Esta configuración permite que el tráfico de DRBD y Pacemaker use la red `192.168.10.0/24` mientras que el acceso SSH y administración use la red `10.0.0.0/8`.
 
 ## Acceso al sistema
 
@@ -657,6 +712,6 @@ Para modificaciones o mejoras, contactar a:
 
 ---
 
-**Última actualización:** 2025-07-22  
+**Última actualización:** 2025-07-23  
 **Versión de Debian:** 12.11 (Bookworm)  
 **Arquitectura:** AMD64

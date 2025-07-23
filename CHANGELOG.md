@@ -5,6 +5,14 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-01-21: **Mejoras en configuración de red para soporte de interfaz dual**
+  - Añadido soporte para configuración de interfaz de red secundaria en config-network.sh
+  - Implementada detección automática de interfaces de red para configuración dual
+  - Añadida validación de formato CIDR y extracción automática de IP y prefijo
+  - Mejorada configuración de /etc/network/interfaces para soportar múltiples interfaces
+  - Añadida funcionalidad interactiva para configurar interfaz secundaria opcionalmente
+  - Actualizada documentación README.md con capacidades de red dual para tráfico de administración y clúster
+  - Integración completa con flujo de configuración existente y respaldo automático
 - 2025-07-23: **Organización de documentación con separación clara entre creación de ISO y despliegue**
   - Añadida referencia clara en docs/01_PROXMOX.md hacia debian/README.md para instruccóes de creación de ISO
   - Centralizada toda la información de creación de ISO personalizada en debian/README.md exclusivamente

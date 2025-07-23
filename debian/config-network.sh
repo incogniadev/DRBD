@@ -186,6 +186,47 @@ if [ -z "$NEW_DOMAIN" ]; then
     NEW_DOMAIN="faraday.org.mx"
 fi
 
+# Configuración de interfaz secundaria
+echo ""
+echo -e "${BLUE}Configuración de interfaz secundaria (opcional):${NC}"
+read -p "¿Deseas configurar una segunda interfaz de red? (s/N): " -n 1 -r
+echo
+if [[ $REPLY =~ ^[SsYy]$ ]]; then
+    # Solicitar IP para interfaz secundaria
+    while true; do
+        read -p "IP secundaria con prefijo CIDR (formato: 192.168.10.100/24): " SECONDARY_CIDR
+        if validate_cidr "$SECONDARY_CIDR"; then
+            SECONDARY_IP=$(echo $SECONDARY_CIDR | cut -d'/' -f1)
+            SECONDARY_PREFIX=$(echo $SECONDARY_CIDR | cut -d'/' -f2)
+            break
+        else
+            echo -e "${RED}Formato inválido. Usa: xxx.xxx.xxx.xxx/yy${NC}"
+        fi
+    done
+    
+    # Calcular máscara de red para interfaz secundaria
+    SECONDARY_NETMASK=$(cidr_to_netmask $SECONDARY_PREFIX)
+    
+    # Detectar interfaz de red principal primero (si no se ha hecho)
+    if [ -z "$INTERFACE" ]; then
+        INTERFACE=$(ip route | grep default | head -1 | sed 's/.*dev \([^ ]*\).*/\1/')
+    fi
+    
+    # Detectar segunda interfaz disponible
+    SECONDARY_INTERFACE=$(ip link show | grep -E '^[0-9]+: e' | grep -v "$INTERFACE" | head -1 | cut -d: -f2 | tr -d ' ')
+    if [ -z "$SECONDARY_INTERFACE" ]; then
+        # Asumir ens19 como interfaz secundaria típica en VMs
+        SECONDARY_INTERFACE="ens19"
+        echo -e "${YELLOW}⚠${NC} Usando interfaz predeterminada: $SECONDARY_INTERFACE"
+    else
+        echo -e "${GREEN}✓${NC} Interfaz secundaria detectada: $SECONDARY_INTERFACE"
+    fi
+    
+    CONFIGURE_SECONDARY=true
+else
+    CONFIGURE_SECONDARY=false
+fi
+
 # Mostrar resumen
 echo ""
 echo -e "${YELLOW}Resumen de cambios:${NC}"
@@ -195,6 +236,11 @@ echo "Máscara: $NEW_NETMASK"
 echo "Nuevo hostname: $NEW_HOSTNAME"
 echo "Dominio: $NEW_DOMAIN"
 echo "FQDN: $NEW_HOSTNAME.$NEW_DOMAIN"
+if [ "$CONFIGURE_SECONDARY" = true ]; then
+    echo "IP secundaria: $SECONDARY_IP"
+    echo "Máscara secundaria: $SECONDARY_NETMASK"
+    echo "Interfaz secundaria: $SECONDARY_INTERFACE"
+fi
 echo ""
 
 # Confirmar cambios
@@ -241,7 +287,35 @@ echo -e "${GREEN}✓${NC} Archivo /etc/hosts actualizado"
 INTERFACE=$(ip route | grep default | head -1 | sed 's/.*dev \([^ ]*\).*/\1/')
 
 # Crear configuración de /etc/network/interfaces (Debian tradicional)
-tee /etc/network/interfaces > /dev/null << EOF
+if [ "$CONFIGURE_SECONDARY" = true ]; then
+    # Configuración con interfaz secundaria
+    tee /etc/network/interfaces > /dev/null << EOF
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto $INTERFACE
+iface $INTERFACE inet static
+    address $NEW_IP
+    netmask $NEW_NETMASK
+    gateway $NEW_GATEWAY
+    dns-nameservers 8.8.8.8 8.8.4.4
+
+# The secondary network interface
+auto $SECONDARY_INTERFACE
+iface $SECONDARY_INTERFACE inet static
+    address $SECONDARY_IP
+    netmask $SECONDARY_NETMASK
+EOF
+else
+    # Configuración solo con interfaz primaria
+    tee /etc/network/interfaces > /dev/null << EOF
 # This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).
 
@@ -259,6 +333,7 @@ iface $INTERFACE inet static
     gateway $NEW_GATEWAY
     dns-nameservers 8.8.8.8 8.8.4.4
 EOF
+fi
 
 echo -e "${GREEN}✓${NC} Configuración de /etc/network/interfaces actualizada"
 
@@ -387,12 +462,18 @@ echo -e "${GREEN}============================================${NC}"
 echo ""
 echo -e "${YELLOW}Información importante:${NC}"
 echo "• Nueva IP: $NEW_IP"
+if [ "$CONFIGURE_SECONDARY" = true ]; then
+    echo "• IP secundaria: $SECONDARY_IP"
+fi
 echo "• Nuevo hostname: $NEW_HOSTNAME.$NEW_DOMAIN"
 echo "• Respaldos en: $BACKUP_DIR"
 echo "• Reinicia el sistema para asegurar que todos los servicios usen la nueva configuración"
 echo ""
 echo -e "${BLUE}Para conectarte por SSH usa:${NC}"
 echo "ssh $(whoami)@$NEW_IP"
+if [ "$CONFIGURE_SECONDARY" = true ]; then
+    echo "ssh $(whoami)@$SECONDARY_IP"
+fi
 echo ""
 
 # Preguntar si desea reiniciar

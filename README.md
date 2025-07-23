@@ -26,6 +26,7 @@
 2. **Configurar red y post-instalación**
    - Consulte la guía: [🌐 **Configuración de Debian**](docs/02_DEBIAN.md).
    - Configuración de red y tareas post-instalación en las VMs.
+   - **Script mejorado**: Soporte para configuración de doble interfaz de red (administración + clúster)
    - **ISO personalizada**: [🚀 **Creación de ISO con preseed**](debian/README.md) para crear la ISO de instalación automatizada.
 
 3. **Instalar los paquetes en los nodos DRBD y configurar el clúster de almacenamiento**
@@ -50,7 +51,7 @@
 | [🐳 **Despliegue de WebApp con Docker**](docs/DOCKER_WEBAPP_DEPLOYMENT.md) | Guía para desplegar aplicaciones web usando Docker y NFS |
 | [🔄 **Pruebas de Failover DRBD**](docs/DRBD_FAILOVER_TEST.md) | Guía completa para probar el failover del clúster DRBD |
 | [📝 **Changelog**](CHANGELOG.md) | Historial de cambios del proyecto |
-| [🚀 **Instalación automatizada**](debian/README.md) | Creación de ISO personalizada con preseed |
+| [🚀 **Instalación automatizada**](debian/README.md) | Creación de ISO personalizada con preseed y configuración dual de red |
 
 ## Componentes del sistema
 
@@ -73,11 +74,11 @@
 - Servicio NFS para compartir almacenamiento
 - Dispositivos: `/dev/sdb1` → `/dev/drbd0` → `/mnt/docker-vol`
 
-#### 🟢 Node 3: Host de ejecución Docker
+#### 🜵 Node 3: Host de ejecución Docker
 - **Almacenamiento 100% centralizado en NFS**
 - Sin datos persistentes locales
 - Acceso transparente vía IP flotante
-- Configuración dual de red para administración y clúster
+- **Configuración dual de red**: Interfaces separadas para administración (ens18) y clúster (ens19)
 
 ## Requisitos del sistema
 
@@ -172,6 +173,6 @@ Diseño de arquitectura por Rodrigo Ernesto Álvarez Aguilera (@incogniadev) - I
 
 ---
 
-**📅 Última actualización**: 2025-07-23 - Organización de documentación con separación clara entre creación de ISO y despliegue
+**📅 Última actualización**: 2025-07-23 - Mejoras en configuración de red con soporte para doble interfaz en laboratorios DRBD
 
 *Esta arquitectura proporciona una base robusta para cargas de trabajo containerizadas que requieren almacenamiento persistente y altamente disponible.*
