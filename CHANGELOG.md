@@ -5,6 +5,11 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-07-23: **Organización de documentación con separación clara entre creación de ISO y despliegue**
+  - Añadida referencia clara en docs/01_PROXMOX.md hacia debian/README.md para instruccóes de creación de ISO
+  - Centralizada toda la información de creación de ISO personalizada en debian/README.md exclusivamente
+  - Actualizado README.md con sección específica para instalación automatizada en guías adicionales
+  - Mejorada navegación entre documentos con referencias cruzadas apropiadas
 - 2025-07-23: **Reestructuración de documentación en guías separadas por fase**
   - Creado docs/01_PROXMOX.md enfocado exclusivamente en creación de VMs y instalación automatizada
   - Separada configuración de red post-instalación para futura guía docs/02_DEBIAN.md

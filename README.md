@@ -26,7 +26,7 @@
 2. **Configurar red y post-instalación**
    - Consulte la guía: [🌐 **Configuración de Debian**](docs/02_DEBIAN.md).
    - Configuración de red y tareas post-instalación en las VMs.
-   - Referencia adicional: [🚀 **Instalación automatizada**](debian/README.md) para detalles del preseed.
+   - **ISO personalizada**: [🚀 **Creación de ISO con preseed**](debian/README.md) para crear la ISO de instalación automatizada.
 
 3. **Instalar los paquetes en los nodos DRBD y configurar el clúster de almacenamiento**
    - Consulte la guía: [⚙️ **Guía de instalación**](docs/INSTALLATION.md).
@@ -50,6 +50,7 @@
 | [🐳 **Despliegue de WebApp con Docker**](docs/DOCKER_WEBAPP_DEPLOYMENT.md) | Guía para desplegar aplicaciones web usando Docker y NFS |
 | [🔄 **Pruebas de Failover DRBD**](docs/DRBD_FAILOVER_TEST.md) | Guía completa para probar el failover del clúster DRBD |
 | [📝 **Changelog**](CHANGELOG.md) | Historial de cambios del proyecto |
+| [🚀 **Instalación automatizada**](debian/README.md) | Creación de ISO personalizada con preseed |
 
 ## Componentes del sistema
 
@@ -171,6 +172,6 @@ Diseño de arquitectura por Rodrigo Ernesto Álvarez Aguilera (@incogniadev) - I
 
 ---
 
-**📅 Última actualización**: 2025-07-23 - Reestructuración de documentación con guías separadas por fase
+**📅 Última actualización**: 2025-07-23 - Organización de documentación con separación clara entre creación de ISO y despliegue
 
 *Esta arquitectura proporciona una base robusta para cargas de trabajo containerizadas que requieren almacenamiento persistente y altamente disponible.*
