@@ -4,11 +4,19 @@ Esta guía describe cómo crear las máquinas virtuales necesarias para el labor
 
 ## Requisitos previos
 
-- Acceso SSH a Proxmox host
+- **Acceso privilegiado**: SSH como `root` o usuario con permisos para gestionar VMs
 - **ISO personalizada recomendada**: `debian/debian-12.11.0-amd64-preseed.iso` (instalación automatizada)
 - **ISO alternativa**: Template o ISO estándar de Debian 12.11+ para instalación manual
 - Red bridge `vmbr2` configurada
 - Espacio suficiente en almacenamiento
+
+### ⚠️ Importante: Instalación escalonada recomendada
+
+**Aunque las VMs se pueden crear simultáneamente con scripts, se recomienda encarecidamente ejecutar las instalaciones de forma escalonada** para evitar colisiones de paquetes durante la instalación automatizada de Debian, ya que todas usan temporalmente la misma IP (10.0.0.69) durante el proceso de instalación.
+
+### 📝 Nota sobre configuración post-instalación
+
+**Importante**: Aunque la instalación de Debian es completamente desatendida (no solicita ningún parámetro), **la configuración de IP final y hostname debe realizarse manualmente** en cada VM después de que complete la instalación. Cada nodo arranca inicialmente con IP temporal `10.0.0.69` y hostname genérico.
 
 ## Especificaciones de las VMs
 
@@ -86,15 +94,31 @@ qm set 232 --net1 virtio,bridge=vmbr2
 qm set 233 --net1 virtio,bridge=vmbr2
 ```
 
-### 6. Iniciar las VMs
+### 6. Iniciar las VMs (Método escalonado recomendado)
+
+⚠️ **Importante**: Para evitar colisiones de paquetes durante la instalación automatizada, inicia las VMs de forma escalonada:
 
 ```bash
-# Iniciar todas las VMs
+# Método 1: Instalación escalonada (RECOMENDADO)
+# Iniciar Node1 primero
 qm start 231
-qm start 232
-qm start 233
+echo "Esperando instalación de Node1... (aproximadamente 10 minutos)"
+# Monitorear progreso: qm vncproxy 231
 
-# Verificar estado
+# Una vez que Node1 complete su instalación y se reinicie, iniciar Node2
+# qm start 232  # Ejecutar cuando Node1 esté listo
+
+# Finalmente, cuando Node2 complete, iniciar Node3
+# qm start 233  # Ejecutar cuando Node2 esté listo
+
+# Verificar estado de todas las VMs
+qm list | grep -E "(231|232|233)"
+```
+
+```bash
+# Método 2: Inicio simultáneo (solo si usas instalación manual)
+# Solo usar este método si NO estás usando la ISO con preseed
+qm start 231 && qm start 232 && qm start 233
 qm list
 ```
 
@@ -116,22 +140,45 @@ qm vncproxy 232  # Ver la instalación en Node2
 qm vncproxy 233  # Ver la instalación en Node3
 ```
 
-### Configuración post-instalación automatizada
+### Configuración post-instalación (Manual requerida)
 
-Después de la instalación automatizada:
+⚠️ **Importante**: Aunque la instalación de Debian es desatendida, **cada VM requiere configuración manual individual** para establecer su IP final y hostname.
+
+Durante la instalación automatizada, el script `config-network.sh` se copia al directorio home del usuario `incognia` y debe ejecutarse manualmente en cada VM.
+
+#### Proceso para cada VM:
 
 ```bash
-# 1. Conectarse vía SSH (la instalación configura IP 10.0.0.69 por defecto)
+# 1. Conectarse vía SSH a cada VM (todas inician con IP temporal)
 ssh incognia@10.0.0.69
 
-# 2. Reconfigurar red para cada nodo usando el script incluido
+# 2. Ejecutar el script de reconfiguración (ya incluido durante la instalación)
 sudo ./config-network.sh
-
-# 3. Configurar IPs finales:
-# - Node1: 192.168.10.231/24
-# - Node2: 192.168.10.232/24
-# - Node3: 192.168.10.233/24
 ```
+
+#### 📝 Qué hace el script config-network.sh:
+- 🔍 **Muestra configuración actual** (IP, hostname, FQDN)
+- ⚙️ **Solicita interactivamente**:
+  - Nueva IP con notación CIDR (ej: `192.168.10.231/24`)
+  - Gateway (calcula sugerencia automáticamente)
+  - Nuevo hostname (ej: `node1`)
+  - Dominio (predeterminado: `faraday.org.mx`)
+- 🔄 **Aplica cambios**:
+  - Actualiza `/etc/hostname`, `/etc/hosts`, `/etc/network/interfaces`
+  - Maneja conflictos con NetworkManager/systemd-networkd
+  - Reinicia servicios de red automáticamente
+  - Verifica conectividad
+- 💾 **Crea respaldos** de configuraciones anteriores
+- ⚙️ **Ofrece reinicio** del sistema para asegurar cambios
+
+#### 🎯 IPs finales objetivo:
+- **Node1**: `192.168.10.231/24` (hostname: `node1`)
+- **Node2**: `192.168.10.232/24` (hostname: `node2`) 
+- **Node3**: `192.168.10.233/24` (hostname: `node3-docker`)
+
+🔄 **Repetir este proceso para cada una de las 3 VMs** antes de proceder con la configuración de DRBD.
+
+📁 **Nota**: El script es inteligente y maneja múltiples métodos de aplicación de red, respaldos automáticos y validaciones de entrada.
 
 **ℹ️ Para más detalles**: Ver [debian/README.md](../debian/README.md) para documentación completa.
 
@@ -311,15 +358,30 @@ qm create 233 \
   --cdrom ${ISO_PATH} \
   --boot order=scsi0
 
-echo "Iniciando todas las VMs..."
-qm start 231
-qm start 232
-qm start 233
-
-echo "Estado de las VMs:"
+echo "⚠️  IMPORTANTE: Para evitar colisiones durante la instalación automatizada,"
+echo "se recomienda iniciar las VMs de forma escalonada:"
+echo ""
+echo "1. Iniciar Node1 primero:"
+echo "   qm start 231"
+echo "   # Esperar ~10 minutos para que complete la instalación"
+echo ""
+echo "2. Cuando Node1 esté listo, iniciar Node2:"
+echo "   qm start 232"
+echo "   # Esperar ~10 minutos para que complete la instalación"
+echo ""
+echo "3. Finalmente, iniciar Node3:"
+echo "   qm start 233"
+echo ""
+echo "Monitorear progreso con: qm vncproxy <vm-id>"
+echo ""
+echo "--- Solo para instalación simultánea (NO recomendado con preseed) ---"
+echo "Para iniciar todas las VMs ahora (usar solo con instalación manual):"
+echo "qm start 231 && qm start 232 && qm start 233"
+echo ""
+echo "Estado actual de las VMs:"
 qm list | grep -E "(231|232|233)"
-
-echo "Configuración completada. Proceder con instalación de Debian en cada VM."
+echo ""
+echo "✅ Configuración de VMs completada. Proceder con instalación escalonada."
 ```
 
 ## Comandos útiles de Proxmox

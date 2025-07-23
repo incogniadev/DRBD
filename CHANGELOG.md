@@ -12,8 +12,16 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-23: Documentación completa en debian/README.md con guías de uso y resolución de problemas
 - 2025-07-23: Añadido .gitignore para excluir archivos ISO y archivos temporales del repositorio
 - 2025-07-23: Añadido diagrama de arquitectura DRBD en formato PNG (DRBD_Diagram_V1.1.png)
+- 2025-07-23: Añadido diagrama de arquitectura DRBD en formato SVG (DRBD_Diagram_V1.1.svg)
 - 2025-07-23: Creado diagrama Mermaid de la arquitectura DRBD (DRBD_Architecture_Diagram.md)
 - 2025-07-23: Documentación completa de la arquitectura con descripción de componentes y flujo de datos
+- 2025-07-23: Añadidas recomendaciones de instalación escalonada para evitar colisiones de IP durante preseed
+- 2025-07-23: Añadidas advertencias sobre configuración post-instalación manual requerida
+- 2025-07-23: Añadida documentación detallada del proceso de configuración de red post-instalación
+- 2025-07-23: Añadida sección de advertencia sobre instalación escalonada en docs/INSTALLATION.md
+- 2025-07-23: Ampliada documentación en docs/PROXMOX_VM_CREATION.md con procedimientos detallados de instalación escalonada
+- 2025-07-23: Añadidos scripts mejorados de creación masiva con advertencias de instalación escalonada
+- 2025-07-23: Añadida documentación sobre configuración manual post-instalación requerida para cada VM
 - 2025-07-21: Creado directorio docs/ dedicado para la documentación organizada
 - 2025-07-21: Añadido ARCHITECTURE.md detallado con el diseño del sistema
 - 2025-07-21: Añadida guía general INSTALLATION.md para todas las distribuciones de Linux

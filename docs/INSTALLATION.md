@@ -33,6 +33,14 @@
 | **NFS** | v4+ | Cliente y servidor |
 | **Docker** | 20.x+ | En Node 3 únicamente |
 
+### ⚠️ Importante: Instalación escalonada recomendada
+
+Durante el proceso de instalación automatizada de Debian con una ISO de preseed, **se recomienda encarecidamente que las instalaciones se realicen de manera escalonada**, comenzando con Node 1, seguido de Node 2 y finalmente Node 3. Esto es importante debido a que las instalaciones simultáneas pueden provocar colisiones de IPs temporales.
+
+**📚 Guías específicas de plataforma:**
+- **Proxmox**: Ver [PROXMOX_VM_CREATION.md](PROXMOX_VM_CREATION.md) para creación de VMs y procedimiento escalonado
+- **Debian**: Ver [debian/README.md](../debian/README.md) para instalación automatizada con preseed
+
 ## Pasos generales de instalación
 
 ### 1. Preparación de nodos DRBD
