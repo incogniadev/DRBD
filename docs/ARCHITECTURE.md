@@ -302,8 +302,8 @@ graph TD
     ND2C -.-> NIC2C
     
     %% Conexión de red entre nodos DRBD (solo por interfaz de clúster)
-    NIC1C <-->|"DRBD Replication<br/>192.168.10.0/24"| NIC2C
-    NIC1A <-.>|"SSH/Admin<br/>10.0.0.0/8"| NIC2A
+    NIC1C <--> NIC2C
+    NIC1A <-.-> NIC2A
     
     %% Estilos
     classDef activeNode fill:#f9f9f9,stroke:#333,stroke-width:2px
@@ -315,9 +315,9 @@ graph TD
     %% Aplicar estilos
     class DRBD1,DRBD2 drbdComponent
     class Storage1,Storage2 storage
-    class NIC1,NIC2 network
-    class App1,FS1,BC1,VBD1,DS1,DD1,ND1 activeNode
-    class App2,FS2,BC2,VBD2,DS2,DD2,ND2 standbyNode
+    class NIC1A,NIC1C,NIC2A,NIC2C network
+    class App1,FS1,BC1,VBD1,DS1,DD1,ND1A,ND1C activeNode
+    class App2,FS2,BC2,VBD2,DS2,DD2,ND2A,ND2C standbyNode
 ```
 
 ### Componentes técnicos:
