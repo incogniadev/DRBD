@@ -34,16 +34,36 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 
 ## Documentación
 
-### 📋 Guías disponibles
+### 📋 Proceso de Configuración Paso a Paso
+
+1. **Crear VMs en Proxmox**
+   - Consulte la guía: [🏗️ **Creación de VMs en Proxmox**](docs/PROXMOX_VM_CREATION.md).
+   - Detalla el proceso de creación de VMs desde el shell de Proxmox.
+
+2. **Instalar OS en las VMs**
+   - Consulte la guía: [🚀 **Instalación automatizada**](debian/README.md).
+   - Proporciona instrucciones desatendidas para la instalación de Debian 12 con preseed.
+
+3. **Instalar los paquetes en los nodos DRBD y configurar el clúster de almacenamiento**
+   - Consulte la guía: [⚙️ **Guía de instalación**](docs/INSTALLATION.md).
+   - Incluye instrucciones detalladas para configurar DRBD y el clúster de almacenamiento.
+
+4. **Instalar Docker en Debian y conectarlo al NFS configurado en el Clúster DRBD**
+   - Consulte la guía: [🔧 **Configuración post-instalación**](docs/PROXMOX_DEBIAN.md).
+   - Describe cómo integrar Docker con el almacenamiento NFS proporcionado por el clúster DRBD.
+
+5. **Desplegar una WebApp simple en Docker y que se almacene en el NFS**
+   - Configuración basada en el entorno requerirá pasos manuales (no documentados aquí).
+
+6. **Probar dar de baja el nodo primario de DRBD y que la WebApp de Docker siga operativa con el failover**
+   - Asegúrese de que el failover de DRBD esté configurado correctamente siguiendo las guías previas.
+   - Probar el failover simulando un fallo en el nodo primario para verificar que el nodo secundario tome el control sin interrupciones.
+
+### 📚 Guías adicionales
 
 | Documento | Descripción |
 |-----------|-------------|
 | [📐 **Arquitectura del sistema**](docs/ARCHITECTURE.md) | Diseño completo y componentes de la arquitectura DRBD |
-| [🚀 **Instalación automatizada**](debian/README.md) | Instalación desatendida con Debian 12 + preseed (Recomendado) |
-| [🤖 **Scripts de automatización**](scripts/README.md) | Scripts para creación automatizada de VMs en Proxmox (Nuevo) |
-| [🏗️ **Creación de VMs en Proxmox**](docs/PROXMOX_VM_CREATION.md) | Guía detallada para crear VMs desde shell de Proxmox |
-| [⚙️ **Guía de instalación**](docs/INSTALLATION.md) | Instrucciones generales de instalación y configuración |
-| [🔧 **Configuración post-instalación**](docs/PROXMOX_DEBIAN.md) | Configuración específica para entornos Proxmox con Debian |
 | [📝 **Changelog**](CHANGELOG.md) | Historial de cambios del proyecto |
 
 ## Componentes del sistema

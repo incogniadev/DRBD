@@ -5,6 +5,7 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-07-23: Proceso de configuración paso a paso en README.md con orden secuencial de guías
 - 2025-07-23: Fecha de última actualización en README.md con formato consistente (2025-07-23)
 - 2025-07-23: Actualización de README.md con sección de últimos cambios destacando mejoras recientes
 - 2025-07-23: Corrección integral de inconsistencias en documentación del proyecto
