@@ -1,0 +1,42 @@
+# Archivos ISO (imágenes de instalación)
+*.iso
+
+# Archivos de respaldo temporales
+*.bak
+*.tmp
+*.temp
+
+# Directorios temporales para creación de ISO
+iso_custom/
+iso_mount/
+initrd_extract/
+
+# Archivos de logs
+*.log
+
+# Archivos comprimidos temporales
+*.tar.gz
+*.zip
+*.7z
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de editor
+*~
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Certificados y llaves privadas
+*.key
+*.pem
+*.crt
+*.p12
+*.pfx
+
+# Variables de entorno locales
+.env
+.env.local

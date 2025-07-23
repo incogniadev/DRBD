@@ -5,6 +5,12 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-07-23: Añadido directorio debian/ con herramientas de instalación automatizada de Debian 12
+- 2025-07-23: Script create-preseed-iso.sh para crear ISOs personalizadas con preseed integrado
+- 2025-07-23: Script config-network.sh para reconfiguración post-instalación de red y hostname
+- 2025-07-23: Archivo de configuración debian-preseed.cfg para instalación desatendida
+- 2025-07-23: Documentación completa en debian/README.md con guías de uso y resolución de problemas
+- 2025-07-23: Añadido .gitignore para excluir archivos ISO y archivos temporales del repositorio
 - 2025-07-23: Añadido diagrama de arquitectura DRBD en formato PNG (DRBD_Diagram_V1.1.png)
 - 2025-07-23: Creado diagrama Mermaid de la arquitectura DRBD (DRBD_Architecture_Diagram.md)
 - 2025-07-23: Documentación completa de la arquitectura con descripción de componentes y flujo de datos
