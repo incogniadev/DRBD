@@ -217,60 +217,81 @@ qm vncproxy 231
 
 ### 2. Configuración de red después de la instalación
 
-En cada VM, configurar la red según el esquema de IPs:
+En cada VM, configurar la red según el esquema de IPs usando el método tradicional de Debian con `/etc/network/interfaces`:
 
 #### Node1 (192.168.10.231)
 ```bash
-cat > /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      addresses:
-        - 192.168.10.231/24
-      gateway4: 192.168.10.1
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
+cat > /etc/network/interfaces << EOF
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto ens18
+iface ens18 inet static
+    address 192.168.10.231
+    netmask 255.255.255.0
+    gateway 192.168.10.1
+    dns-nameservers 8.8.8.8 8.8.4.4
 EOF
 
-netplan apply
+# Reiniciar servicios de red
+systemctl restart networking
 ```
 
 #### Node2 (192.168.10.232)
 ```bash
-cat > /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      addresses:
-        - 192.168.10.232/24
-      gateway4: 192.168.10.1
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
+cat > /etc/network/interfaces << EOF
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto ens18
+iface ens18 inet static
+    address 192.168.10.232
+    netmask 255.255.255.0
+    gateway 192.168.10.1
+    dns-nameservers 8.8.8.8 8.8.4.4
 EOF
 
-netplan apply
+# Reiniciar servicios de red
+systemctl restart networking
 ```
 
 #### Node3 (192.168.10.233)
 ```bash
-cat > /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      addresses:
-        - 192.168.10.233/24
-      gateway4: 192.168.10.1
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
+cat > /etc/network/interfaces << EOF
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+auto ens18
+iface ens18 inet static
+    address 192.168.10.233
+    netmask 255.255.255.0
+    gateway 192.168.10.1
+    dns-nameservers 8.8.8.8 8.8.4.4
 EOF
 
-netplan apply
+# Reiniciar servicios de red
+systemctl restart networking
 ```
 
 ### 3. Configurar hostnames y resolución

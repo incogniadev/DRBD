@@ -99,78 +99,99 @@ ping -c 3 8.8.8.8
 
 ### 2. Configuración de red dual (todas las VMs)
 
-**Nota**: Esta configuración asume que las VMs tienen dos interfaces de red como se especifica en la guía de creación.
+**Nota**: Esta configuración asume que las VMs tienen dos interfaces de red como se especifica en la guía de creación. Debian Server usa el método tradicional con `/etc/network/interfaces`.
 
 #### Node1 (192.168.10.231)
 ```bash
-sudo cat > /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      addresses:
-        - 10.0.0.231/8
-      gateway4: 10.0.0.1
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
-      routes:
-        - to: default
-          via: 10.0.0.1
-    eth1:
-      addresses:
-        - 192.168.10.231/24
+sudo cat > /etc/network/interfaces << EOF
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# Primary network interface (administration)
+auto ens18
+iface ens18 inet static
+    address 10.0.0.231
+    netmask 255.0.0.0
+    gateway 10.0.0.1
+    dns-nameservers 8.8.8.8 8.8.4.4
+
+# Secondary network interface (cluster)
+auto ens19
+iface ens19 inet static
+    address 192.168.10.231
+    netmask 255.255.255.0
 EOF
 
-sudo netplan apply
+# Reiniciar servicios de red
+sudo systemctl restart networking
 ```
 
 #### Node2 (192.168.10.232)
 ```bash
-sudo cat > /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      addresses:
-        - 10.0.0.232/8
-      gateway4: 10.0.0.1
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
-      routes:
-        - to: default
-          via: 10.0.0.1
-    eth1:
-      addresses:
-        - 192.168.10.232/24
+sudo cat > /etc/network/interfaces << EOF
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# Primary network interface (administration)
+auto ens18
+iface ens18 inet static
+    address 10.0.0.232
+    netmask 255.0.0.0
+    gateway 10.0.0.1
+    dns-nameservers 8.8.8.8 8.8.4.4
+
+# Secondary network interface (cluster)
+auto ens19
+iface ens19 inet static
+    address 192.168.10.232
+    netmask 255.255.255.0
 EOF
 
-sudo netplan apply
+# Reiniciar servicios de red
+sudo systemctl restart networking
 ```
 
 #### Node3 (192.168.10.233)
 ```bash
-sudo cat > /etc/netplan/01-netcfg.yaml << EOF
-network:
-  version: 2
-  renderer: networkd
-  ethernets:
-    eth0:
-      addresses:
-        - 10.0.0.233/8
-      gateway4: 10.0.0.1
-      nameservers:
-        addresses: [8.8.8.8, 8.8.4.4]
-      routes:
-        - to: default
-          via: 10.0.0.1
-    eth1:
-      addresses:
-        - 192.168.10.233/24
+sudo cat > /etc/network/interfaces << EOF
+# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# Primary network interface (administration)
+auto ens18
+iface ens18 inet static
+    address 10.0.0.233
+    netmask 255.0.0.0
+    gateway 10.0.0.1
+    dns-nameservers 8.8.8.8 8.8.4.4
+
+# Secondary network interface (cluster)
+auto ens19
+iface ens19 inet static
+    address 192.168.10.233
+    netmask 255.255.255.0
 EOF
 
-sudo netplan apply
+# Reiniciar servicios de red
+sudo systemctl restart networking
 ```
 
 ### 3. Configurar hostnames y resolución DNS
