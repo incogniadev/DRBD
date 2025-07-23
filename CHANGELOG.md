@@ -5,6 +5,11 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-07-23: **Reestructuración de documentación en guías separadas por fase**
+  - Creado docs/01_PROXMOX.md enfocado exclusivamente en creación de VMs y instalación automatizada
+  - Separada configuración de red post-instalación para futura guía docs/02_DEBIAN.md
+  - Eliminado contenido de configuración manual de red de la guía de Proxmox
+  - Simplificado flujo de documentación con referencia clara entre fases
 - 2025-07-23: **Documentación integral mejorada con guías paso a paso ordenadas**
   - Añadida guía ordenada y paso a paso en README.md para implementación secuencial correcta
   - Expandida docs/DOCKER_WEBAPP_DEPLOYMENT.md con ejemplo completo HTML dinámico y scripts de automatización

@@ -20,12 +20,13 @@
 ### 📋 Proceso de Configuración Paso a Paso
 
 1. **Crear VMs en Proxmox**
-   - Consulte la guía: [🏗️ **Creación de VMs en Proxmox**](docs/PROXMOX_VM_CREATION.md).
-   - Detalla el proceso de creación de VMs desde el shell de Proxmox.
+   - Consulte la guía: [🏗️ **Creación de VMs en Proxmox**](docs/01_PROXMOX.md).
+   - Detalla el proceso de creación de VMs desde el shell de Proxmox con instalación automatizada.
 
-2. **Instalar OS en las VMs**
-   - Consulte la guía: [🚀 **Instalación automatizada**](debian/README.md).
-   - Proporciona instrucciones desatendidas para la instalación de Debian 12 con preseed.
+2. **Configurar red y post-instalación**
+   - Consulte la guía: [🌐 **Configuración de Debian**](docs/02_DEBIAN.md).
+   - Configuración de red y tareas post-instalación en las VMs.
+   - Referencia adicional: [🚀 **Instalación automatizada**](debian/README.md) para detalles del preseed.
 
 3. **Instalar los paquetes en los nodos DRBD y configurar el clúster de almacenamiento**
    - Consulte la guía: [⚙️ **Guía de instalación**](docs/INSTALLATION.md).
@@ -170,6 +171,6 @@ Diseño de arquitectura por Rodrigo Ernesto Álvarez Aguilera (@incogniadev) - I
 
 ---
 
-**📅 Última actualización**: 2025-07-23 - Documentación integral mejorada con guías paso a paso y scripts de automatización
+**📅 Última actualización**: 2025-07-23 - Reestructuración de documentación con guías separadas por fase
 
 *Esta arquitectura proporciona una base robusta para cargas de trabajo containerizadas que requieren almacenamiento persistente y altamente disponible.*
