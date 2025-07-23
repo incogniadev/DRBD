@@ -84,12 +84,12 @@
 
 ### 💻 Hardware mínimo recomendado
 
-|| Componente | Node 1 & 2 (DRBD) | Node 3 (Docker) |
-||------------|-------------------|------------------|
-|| **CPU** | 2 vCPUs | 2 vCPUs |
-|| **RAM** | 4GB | 4GB |
-|| **Almacenamiento** | 24GB SO + 16GB DRBD | 32GB |
-|| **Red** | 2 interfaces (vmbr2) | 2 interfaces (vmbr2) |
+| Componente | Node 1 & 2 (DRBD) | Node 3 (Docker) |
+|------------|-------------------|------------------|
+| **CPU** | 2 vCPUs | 2 vCPUs |
+| **RAM** | 4GB | 4GB |
+| **Almacenamiento** | 24GB SO + 16GB DRBD | 32GB |
+| **Red** | 2 interfaces (vmbr2) | 2 interfaces (vmbr2) |
 
 ### 🛠️ Software requerido
 
