@@ -431,39 +431,68 @@ echo "✅ Configuración de VMs completada. Proceder con instalación escalonada
 # Listar todas las VMs
 qm list
 
-# Ver configuración de una VM
-qm config 101
+# Ver configuración de una VM específica (ejemplos con nuestras VMs)
+qm config 231  # Node1 DRBD
+qm config 232  # Node2 DRBD
+qm config 233  # Node3 Docker
 
 # Detener una VM
-qm stop 101
+qm stop 231    # Detener Node1
+qm stop 232    # Detener Node2
+qm stop 233    # Detener Node3
 
 # Reiniciar una VM
-qm reboot 101
+qm reboot 231  # Reiniciar Node1
+qm reboot 232  # Reiniciar Node2
+qm reboot 233  # Reiniciar Node3
 
-# Eliminar una VM
-qm destroy 101
+# Eliminar una VM (¡CUIDADO!)
+qm destroy 231 # Eliminar Node1
+qm destroy 232 # Eliminar Node2
+qm destroy 233 # Eliminar Node3
 
-# Crear snapshot
-qm snapshot 101 pre-drbd-config
+# Crear snapshot antes de configurar DRBD
+qm snapshot 231 pre-drbd-config
+qm snapshot 232 pre-drbd-config
+qm snapshot 233 pre-docker-config
 
-# Restaurar snapshot
-qm rollback 101 pre-drbd-config
+# Restaurar snapshot si algo sale mal
+qm rollback 231 pre-drbd-config
+qm rollback 232 pre-drbd-config
+qm rollback 233 pre-docker-config
 
-# Clonar VM
-qm clone 101 201 --name node1-backup
+# Clonar VM para respaldo
+qm clone 231 234 --name node1-backup
+qm clone 232 235 --name node2-backup
+qm clone 233 236 --name node3-backup
 ```
 
 ### Monitoreo
 
 ```bash
-# Ver uso de recursos
-qm monitor 101
+# Ver uso de recursos de las VMs del laboratorio
+qm monitor 231  # Monitorear Node1
+qm monitor 232  # Monitorear Node2
+qm monitor 233  # Monitorear Node3
 
-# Ver logs de una VM
-qm log 101
+# Ver logs de las VMs
+qm log 231     # Logs de Node1
+qm log 232     # Logs de Node2
+qm log 233     # Logs de Node3
 
-# Acceso VNC
-qm vncproxy 101
+# Acceso VNC para instalación/troubleshooting
+qm vncproxy 231  # VNC a Node1
+qm vncproxy 232  # VNC a Node2
+qm vncproxy 233  # VNC a Node3
+
+# Verificar estado de todas las VMs del laboratorio
+qm list | grep -E "(231|232|233)"
+
+# Iniciar todas las VMs del laboratorio (método escalonado recomendado)
+qm start 231 && sleep 600 && qm start 232 && sleep 600 && qm start 233
+
+# Detener todas las VMs del laboratorio en orden
+qm stop 233 && qm stop 232 && qm stop 231
 ```
 
 ## Consideraciones importantes
