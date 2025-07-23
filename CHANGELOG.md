@@ -22,6 +22,12 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-23: Ampliada documentación en docs/PROXMOX_VM_CREATION.md con procedimientos detallados de instalación escalonada
 - 2025-07-23: Añadidos scripts mejorados de creación masiva con advertencias de instalación escalonada
 - 2025-07-23: Añadida documentación sobre configuración manual post-instalación requerida para cada VM
+- 2025-07-23: Creado script ejecutable scripts/create-drbd-vms.sh para automatización completa de creación de VMs
+- 2025-07-23: Añadido scripts/README.md con documentación detallada de herramientas de automatización
+- 2025-07-23: Optimizado script create-drbd-vms.sh para usar ISO de preseed por defecto sin parámetros
+- 2025-07-23: Mejorado mensaje de ayuda del script con enfoque en configuración por defecto
+- 2025-07-23: Actualizado README.md principal con sección de scripts de automatización y métodos de instalación
+- 2025-07-23: Actualizados requisitos de hardware en README.md para reflejar especificaciones actuales (24GB+16GB DRBD, 32GB Docker)
 - 2025-07-21: Creado directorio docs/ dedicado para la documentación organizada
 - 2025-07-21: Añadido ARCHITECTURE.md detallado con el diseño del sistema
 - 2025-07-21: Añadida guía general INSTALLATION.md para todas las distribuciones de Linux

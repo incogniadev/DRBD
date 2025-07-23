@@ -30,8 +30,10 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 |-----------|-------------|
 | [📐 **Arquitectura del sistema**](docs/ARCHITECTURE.md) | Diseño completo y componentes de la arquitectura DRBD |
 | [🚀 **Instalación automatizada**](debian/README.md) | Instalación desatendida con Debian 12 + preseed (Recomendado) |
+| [🤖 **Scripts de automatización**](scripts/README.md) | Scripts para creación automatizada de VMs en Proxmox (Nuevo) |
+| [🏗️ **Creación de VMs en Proxmox**](docs/PROXMOX_VM_CREATION.md) | Guía detallada para crear VMs desde shell de Proxmox |
 | [⚙️ **Guía de instalación**](docs/INSTALLATION.md) | Instrucciones generales de instalación y configuración |
-| [🏗️ **Implementación en Proxmox**](docs/PROXMOX_DEBIAN.md) | Guía específica para entornos Proxmox con Debian |
+| [🔧 **Configuración post-instalación**](docs/PROXMOX_DEBIAN.md) | Configuración específica para entornos Proxmox con Debian |
 | [📝 **Changelog**](CHANGELOG.md) | Historial de cambios del proyecto |
 
 ## Componentes del sistema
@@ -68,8 +70,8 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 | Componente | Node 1 & 2 (DRBD) | Node 3 (Docker) |
 |------------|-------------------|------------------|
 | **CPU** | 2 vCPUs | 2 vCPUs |
-| **RAM** | 2GB (4GB recomendado) | 4GB mínimo |
-| **Almacenamiento** | 20GB SO + 10GB DRBD | 30GB |
+| **RAM** | 4GB recomendado | 4GB mínimo |
+| **Almacenamiento** | 24GB SO + 16GB DRBD | 32GB |
 | **Red** | 2 interfaces (gestión + clúster) | 2 interfaces |
 
 ### 🛠️ Software requerido
@@ -96,9 +98,29 @@ cat docs/ARCHITECTURE.md
 ### 2. Instalación automatizada con Debian (Recomendado)
 
 #### Para entornos Proxmox con instalación desatendida:
+
+**🎆 Método 1: Automatización completa con script (Recomendado)**
 ```bash
-# 1. Crear VMs en Proxmox usando la ISO personalizada
+# 1. En el host Proxmox, ejecutar script de automatización
+./scripts/create-drbd-vms.sh
+# Crea automáticamente las 3 VMs con ISO preseed
+
+# 2. Instalación escalonada (importante para evitar colisiones IP)
+qm start 231  # Node1 - esperar ~10 min
+qm start 232  # Node2 - cuando Node1 esté listo
+qm start 233  # Node3 - cuando Node2 esté listo
+
+# 3. Configurar red en cada VM post-instalación
+ssh incognia@10.0.0.69
+sudo ./config-network.sh
+# Repetir para cada VM con IPs finales: 231, 232, 233
+```
+
+**🛠️ Método 2: Creación manual de VMs**
+```bash
+# 1. Crear VMs manualmente usando la ISO personalizada
 # Usar: debian/debian-12.11.0-amd64-preseed.iso
+# Ver: docs/PROXMOX_VM_CREATION.md
 
 # 2. La instalación se ejecuta automáticamente con:
 # - Usuario: incognia (con sudo y SSH)
@@ -106,7 +128,7 @@ cat docs/ARCHITECTURE.md
 # - Paquetes preinstalados: SSH, herramientas de sistema
 
 # 3. Reconfigurar red post-instalación
-sudo ./debian/config-network.sh
+sudo ./config-network.sh
 
 # 4. Seguir guía de configuración post-instalación
 cat docs/PROXMOX_DEBIAN.md
