@@ -29,6 +29,7 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 | Documento | Descripción |
 |-----------|-------------|
 | [📐 **Arquitectura del sistema**](docs/ARCHITECTURE.md) | Diseño completo y componentes de la arquitectura DRBD |
+| [🚀 **Instalación automatizada**](debian/README.md) | Instalación desatendida con Debian 12 + preseed (Recomendado) |
 | [⚙️ **Guía de instalación**](docs/INSTALLATION.md) | Instrucciones generales de instalación y configuración |
 | [🏗️ **Implementación en Proxmox**](docs/PROXMOX_DEBIAN.md) | Guía específica para entornos Proxmox con Debian |
 | [📝 **Changelog**](CHANGELOG.md) | Historial de cambios del proyecto |
@@ -90,7 +91,34 @@ Para comenzar con la implementación del clúster DRBD de alta disponibilidad, s
 cat docs/ARCHITECTURE.md
 ```
 
-### 2. Selecciona tu guía de instalación
+### 2. Instalación automatizada con Debian (Recomendado)
+
+#### Para entornos Proxmox con instalación desatendida:
+```bash
+# 1. Crear VMs en Proxmox usando la ISO personalizada
+# Usar: debian/debian-12.11.0-amd64-preseed.iso
+
+# 2. La instalación se ejecuta automáticamente con:
+# - Usuario: incognia (con sudo y SSH)
+# - Red estática: 10.0.0.69/8 (reconfigurar post-instalación)
+# - Paquetes preinstalados: SSH, herramientas de sistema
+
+# 3. Reconfigurar red post-instalación
+sudo ./debian/config-network.sh
+
+# 4. Seguir guía de configuración post-instalación
+cat docs/PROXMOX_DEBIAN.md
+```
+
+#### Crear ISO personalizada (opcional):
+```bash
+# Si necesitas generar la ISO personalizada
+cd debian/
+./create-preseed-iso.sh
+# Genera: debian-12.11.0-amd64-preseed.iso
+```
+
+### 3. Métodos de instalación alternativos
 
 #### Instalación general (cualquier Linux)
 ```bash
@@ -98,9 +126,9 @@ cat docs/ARCHITECTURE.md
 cat docs/INSTALLATION.md
 ```
 
-#### Instalación específica para Proxmox + Debian
+#### Instalación manual para Proxmox + Debian
 ```bash
-# Para entornos virtualizados con Proxmox
+# Para instalación manual tradicional
 cat docs/PROXMOX_DEBIAN.md
 ```
 

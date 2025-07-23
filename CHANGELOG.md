@@ -25,6 +25,9 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Comandos de gestión y monitoreo de VMs en Proxmox
 
 ### Cambiado
+- 2025-07-23: Actualizada documentación en README.md, docs/PROXMOX_DEBIAN.md y docs/PROXMOX_VM_CREATION.md para incluir información sobre instalación automatizada con preseed
+- 2025-07-23: Reorganizada guía de instalación en docs/ para priorizar el método automatizado
+- 2025-07-23: Añadidas referencias cruzadas entre documentación tradicional y automatizada
 - 2025-07-22: Actualizada configuración de VMs para usar machine type Q35 en lugar del predeterminado i440fx
 - 2025-07-22: Cambiada imagen ISO de instalación de debian-12.11.0-amd64-netinst.iso a debian-12.11.0-amd64-preseed.iso
 - 2025-07-21: Refactorizado README.md para enfocarse en el resumen del proyecto y el inicio rápido

@@ -2,10 +2,59 @@
 
 Esta guía cubre la configuración específica de software después de instalar Debian en las máquinas virtuales del laboratorio DRBD.
 
-## Prerrequisitos
+## 🚀 Instalación automatizada (Recomendado)
+
+Para una instalación completamente desatendida, usa la **ISO personalizada con preseed**:
+
+### 1. Usar la ISO personalizada
+```bash
+# En Proxmox, usar la ISO personalizada:
+debian/debian-12.11.0-amd64-preseed.iso
+
+# Esta ISO incluye:
+# - Instalación completamente automatizada
+# - Usuario 'incognia' preconfigurado con SSH y sudo
+# - Paquetes esenciales preinstalados
+# - Configuración de red inicial (10.0.0.69/8)
+```
+
+### 2. Proceso de instalación automatizada
+1. **Arranque automático**: Tras 5 segundos se selecciona "Automated Install (Preseed)"
+2. **Instalación desatendida**: Sin intervención manual requerida
+3. **Usuario preconfigurado**: 
+   - Usuario: `incognia`
+   - Grupos: `sudo`, `ssh-users`
+   - Llave SSH instalada automáticamente
+4. **Paquetes preinstalados**: SSH, herramientas de sistema, mc, btop, neofetch
+5. **Reinicio automático**: El sistema se reinicia y queda listo para usar
+
+### 3. Reconfiguración post-instalación
+
+Después de la instalación automatizada, reconfigurar la red para cada nodo:
+
+```bash
+# Conectarse vía SSH (la instalación usa IP 10.0.0.69)
+ssh incognia@10.0.0.69
+
+# Ejecutar script de reconfiguración de red
+sudo ./config-network.sh
+
+# Seguir las instrucciones para configurar:
+# - Node1: 192.168.10.231/24
+# - Node2: 192.168.10.232/24  
+# - Node3: 192.168.10.233/24
+```
+
+**ℹ️ Información detallada**: Ver [debian/README.md](../debian/README.md) para documentación completa de la instalación automatizada.
+
+---
+
+## 🛠️ Instalación manual (Método tradicional)
+
+### Prerrequisitos para instalación manual
 
 - VMs creadas según [PROXMOX_VM_CREATION.md](PROXMOX_VM_CREATION.md)
-- Debian 12.11+ instalado en todas las VMs
+- Debian 12.11+ instalado manualmente en todas las VMs
 - Acceso SSH o consola a las máquinas virtuales
 - Red configurada con acceso a internet para descarga de paquetes
 

@@ -5,7 +5,8 @@ Esta guía describe cómo crear las máquinas virtuales necesarias para el labor
 ## Requisitos previos
 
 - Acceso SSH a Proxmox host
-- Template o ISO de Debian 12.11+ disponible
+- **ISO personalizada recomendada**: `debian/debian-12.11.0-amd64-preseed.iso` (instalación automatizada)
+- **ISO alternativa**: Template o ISO estándar de Debian 12.11+ para instalación manual
 - Red bridge `vmbr2` configurada
 - Espacio suficiente en almacenamiento
 
@@ -97,14 +98,53 @@ qm start 233
 qm list
 ```
 
-## Configuración post-instalación del SO
+## 🚀 Instalación automatizada con ISO personalizada (Recomendado)
 
-### 1. Acceder a las VMs e instalar Debian
+### Uso de debian-12.11.0-amd64-preseed.iso
+
+Si estás usando la ISO personalizada, la instalación será completamente automatizada:
 
 ```bash
-# Acceder a consola de VM para instalación
+# 1. Las VMs arrancarán automáticamente desde la ISO
+# 2. Tras 5 segundos se seleccionará "Automated Install (Preseed)"
+# 3. La instalación procederá sin intervención manual
+# 4. Al finalizar, el sistema se reiniciará automáticamente
+
+# Para monitorear el progreso (opcional):
+qm vncproxy 231  # Ver la instalación en Node1
+qm vncproxy 232  # Ver la instalación en Node2
+qm vncproxy 233  # Ver la instalación en Node3
+```
+
+### Configuración post-instalación automatizada
+
+Después de la instalación automatizada:
+
+```bash
+# 1. Conectarse vía SSH (la instalación configura IP 10.0.0.69 por defecto)
+ssh incognia@10.0.0.69
+
+# 2. Reconfigurar red para cada nodo usando el script incluido
+sudo ./config-network.sh
+
+# 3. Configurar IPs finales:
+# - Node1: 192.168.10.231/24
+# - Node2: 192.168.10.232/24
+# - Node3: 192.168.10.233/24
+```
+
+**ℹ️ Para más detalles**: Ver [debian/README.md](../debian/README.md) para documentación completa.
+
+---
+
+## 🛠️ Instalación manual (Método tradicional)
+
+### 1. Acceder a las VMs e instalar Debian manualmente
+
+```bash
+# Acceder a consola de VM para instalación manual
 qm monitor 231
-# Seguir proceso de instalación de Debian
+# Seguir proceso de instalación de Debian tradicional
 
 # O usar VNC si está disponible
 qm vncproxy 231
