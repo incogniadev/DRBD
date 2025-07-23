@@ -9,7 +9,8 @@ Este documento describe una solución de almacenamiento de alta disponibilidad u
 ```mermaid
 graph TB
     subgraph "Capa de almacenamiento"
-        subgraph N1 ["Nodo 1 (Primario)"]
+        subgraph N1 ["Nodo 1 (node1) - Primario"]
+            A1N["Admin: 10.0.0.231/8<br/>Cluster: 192.168.10.231/24"]
             A1["/dev/sdb1<br/>Dispositivo físico"]
             A2["/dev/drbd0<br/>DRBD primario"]
             A3["/mnt/docker-vol<br/>Sistema de archivos montado"]
@@ -18,7 +19,8 @@ graph TB
             A5["192.168.10.230<br/>IP flotante"]
         end
         
-        subgraph N2 ["Nodo 2 (Secundario)"]
+        subgraph N2 ["Nodo 2 (node2) - Secundario"]
+            B1N["Admin: 10.0.0.232/8<br/>Cluster: 192.168.10.232/24"]
             B1["/dev/sdb1<br/>Dispositivo físico"]
             B2["/dev/drbd0<br/>DRBD secundario"]
             B3["/mnt/docker-vol<br/>Desmontado"]
@@ -29,14 +31,15 @@ graph TB
     end
     
     subgraph "Gestión del clúster"
-        C1["Clúster Pacemaker"]
+        C1["Clúster Pacemaker<br/>Red: 192.168.10.0/24"]
         C2["Monitor de recursos"]
         C3["Controlador de failover"]
         C4["Gestor de IP"]
     end
     
     subgraph "Capa de aplicación"
-        D1["Host Docker<br/>Nodo 3"]
+        D1N["Admin: 10.0.0.233/8<br/>Cluster: 192.168.10.233/24"]
+        D1["Host Docker<br/>(node3-docker)"]
         D2["Cliente NFS"]
         D3["Contenedor 1"]
         D4["Contenedor 2"]
@@ -177,20 +180,26 @@ graph TB
 
 ### Esquema de direcciones IP
 
-**⚠️ Nota importante:** Durante la instalación automatizada, todas las VMs usan temporalmente la IP `10.0.0.69/8` y deben ser reconfiguradas individualmente después de la instalación.
+**⚠️ Nota importante:** Durante la instalación automatizada, todas las VMs usan temporalmente la IP `10.0.0.69/8` y deben ser reconfiguradas individualmente después de la instalación usando el script `config-network.sh`.
+
+#### Arquitectura de red dual
+
+El laboratorio DRBD implementa una arquitectura de red de interfaz dual para separar el tráfico de administración del tráfico del clúster, proporcionando mejor aislamiento y rendimiento:
+
+- **Interfaz primaria (`ens18`)**: Red de administración/acceso general
+- **Interfaz secundaria (`ens19`)**: Red dedicada del clúster DRBD/Pacemaker
 
 #### Red de producción (configuración final):
-- **Nodo 1 (DRBD primario)**:
-  - IP principal: `192.168.10.231/24`
-  - Hostname: `node1`
-- **Nodo 2 (DRBD secundario)**:
-  - IP principal: `192.168.10.232/24`
-  - Hostname: `node2`
-- **Nodo 3 (Host Docker)**:
-  - IP principal: `192.168.10.233/24`
-  - Hostname: `node3-docker`
-- **IP flotante**: `192.168.10.230/24` (IP virtual para HA)
-- **Gateway**: `192.168.10.1`
+
+| Nodo | Interfaz Primaria (Administración) | Interfaz Secundaria (Clúster) | Hostname |
+|------|-----------------------------------|-------------------------------|----------|
+| **Nodo 1 (DRBD primario)** | `10.0.0.231/8` | `192.168.10.231/24` | `node1` |
+| **Nodo 2 (DRBD secundario)** | `10.0.0.232/8` | `192.168.10.232/24` | `node2` |
+| **Nodo 3 (Host Docker)** | `10.0.0.233/8` | `192.168.10.233/24` | `node3-docker` |
+
+- **IP flotante**: `192.168.10.230/24` (IP virtual para HA en red de clúster)
+- **Gateway de administración**: `10.0.0.1`
+- **Gateway de clúster**: `192.168.10.1`
 - **DNS**: `8.8.8.8, 8.8.4.4`
 
 #### Red temporal (durante instalación):
@@ -198,10 +207,35 @@ graph TB
 - **Gateway temporal**: `10.0.0.1`
 - **Hostname temporal**: `preseed`
 
+### Configuración automática de red post-instalación
+
+El script `config-network.sh` configura automáticamente la arquitectura de red dual en cada nodo.
+
+#### Configuración de `/etc/network/interfaces` generada:
+
+```bash
+# Interfaz de administración (ens18)
+auto ens18
+iface ens18 inet static
+    address 10.0.0.231
+    netmask 255.0.0.0
+    gateway 10.0.0.1
+    dns-nameservers 8.8.8.8 8.8.4.4
+
+# Interfaz de clúster (ens19) - sin gateway
+auto ens19
+iface ens19 inet static
+    address 192.168.10.231
+    netmask 255.255.255.0
+```
+
 ### Requisitos de red
-- **Baja latencia**: <1ms idealmente entre nodos DRBD
-- **Red dedicada**: Red separada para comunicación del clúster
+- **Baja latencia**: <1ms idealmente entre nodos DRBD en red de clúster
+- **Red dual segregada**: 
+  - Red de administración: `10.0.0.0/8` para SSH, gestión y acceso general
+  - Red de clúster: `192.168.10.0/24` para tráfico DRBD, Pacemaker y NFS
 - **Ancho de banda**: Suficiente para transferencias de imágenes Docker y datos de contenedores
+- **Aislamiento**: Separación física o lógica entre redes de administración y clúster
 
 ## Diagrama técnico de arquitectura DRBD
 
@@ -210,7 +244,7 @@ El siguiente diagrama muestra el flujo de datos técnico a nivel de sistema entr
 ```mermaid
 graph TD
     %% Nodo izquierdo (activo)
-    subgraph Computer1["Computer (Active)"]
+    subgraph Computer1["Node1 (Active) - 10.0.0.231 | 192.168.10.231"]
         App1["Any Application"]
         FS1["File System"]
         BC1["Buffer Cache"]
@@ -218,13 +252,15 @@ graph TD
         DRBD1["DRBD"]
         DS1["Disk Sched"]
         DD1["Disk Driver"]
-        ND1["NIC Driver"]
+        ND1A["NIC Driver (Admin)<br/>ens18"]
+        ND1C["NIC Driver (Cluster)<br/>ens19"]
         Storage1["Storage"]
-        NIC1["NIC"]
+        NIC1A["NIC Admin<br/>10.0.0.231"]
+        NIC1C["NIC Cluster<br/>192.168.10.231"]
     end
     
     %% Nodo derecho (standby)
-    subgraph Computer2["Computer (Standby)"]
+    subgraph Computer2["Node2 (Standby) - 10.0.0.232 | 192.168.10.232"]
         App2["Any Application"]
         FS2["File System"]
         BC2["Buffer Cache"]
@@ -232,9 +268,11 @@ graph TD
         DRBD2["DRBD"]
         DS2["Disk Sched"]
         DD2["Disk Driver"]
-        ND2["NIC Driver"]
+        ND2A["NIC Driver (Admin)<br/>ens18"]
+        ND2C["NIC Driver (Cluster)<br/>ens19"]
         Storage2["Storage"]
-        NIC2["NIC"]
+        NIC2A["NIC Admin<br/>10.0.0.232"]
+        NIC2C["NIC Cluster<br/>192.168.10.232"]
     end
     
     %% Conexiones del nodo activo
@@ -245,8 +283,10 @@ graph TD
     DRBD1 --> DS1
     DS1 --> DD1
     DD1 --> Storage1
-    DRBD1 --> ND1
-    ND1 --> NIC1
+    DRBD1 --> ND1A
+    DRBD1 --> ND1C
+    ND1A --> NIC1A
+    ND1C --> NIC1C
     
     %% Conexiones del nodo standby (líneas punteadas)
     App2 -.-> FS2
@@ -256,11 +296,14 @@ graph TD
     DRBD2 -.-> DS2
     DS2 -.-> DD2
     DD2 -.-> Storage2
-    DRBD2 -.-> ND2
-    ND2 -.-> NIC2
+    DRBD2 -.-> ND2A
+    DRBD2 -.-> ND2C
+    ND2A -.-> NIC2A
+    ND2C -.-> NIC2C
     
-    %% Conexión de red entre nodos DRBD
-    NIC1 <--> NIC2
+    %% Conexión de red entre nodos DRBD (solo por interfaz de clúster)
+    NIC1C <-->|"DRBD Replication<br/>192.168.10.0/24"| NIC2C
+    NIC1A <-.>|"SSH/Admin<br/>10.0.0.0/8"| NIC2A
     
     %% Estilos
     classDef activeNode fill:#f9f9f9,stroke:#333,stroke-width:2px

@@ -12,6 +12,8 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
   - Mejorada configuración de /etc/network/interfaces para soportar múltiples interfaces
   - Añadida funcionalidad interactiva para configurar interfaz secundaria opcionalmente
   - Actualizada documentación README.md con capacidades de red dual para tráfico de administración y clúster
+  - Actualizada documentación docs/ARCHITECTURE.md con esquema de red dual detallado
+  - Actualizados diagramas Mermaid para reflejar configuración de interfaces específicas
   - Integración completa con flujo de configuración existente y respaldo automático
 - 2025-07-23: **Organización de documentación con separación clara entre creación de ISO y despliegue**
   - Añadida referencia clara en docs/01_PROXMOX.md hacia debian/README.md para instruccóes de creación de ISO
