@@ -6,12 +6,15 @@
 
 > **📍 Referencia completa**: Para detalles completos de arquitectura y configuración de red, consulta [docs/ARCHITECTURE.md](ARCHITECTURE.md).
 
-| Nodo | Función | IP Administración | IP Clúster |
-|------|---------|-------------------|---------------|
-| **Node 1** | DRBD Primario | `10.0.0.231/8` | `192.168.10.231/24` |
-| **Node 2** | DRBD Secundario | `10.0.0.232/8` | `192.168.10.232/24` |
-| **Node 3** | Host Docker | `10.0.0.233/8` | `192.168.10.233/24` |
-| **VIP** | IP Flotante | - | `192.168.10.230/24` |
+**⚠️ Nota importante:** Durante la instalación automatizada con preseed, todas las VMs usan temporalmente la IP `10.0.0.69/8` y deben ser reconfiguradas individualmente después de la instalación.
+
+|| Nodo | Función | IP Final | Hostname |
+||------|---------|----------|----------|
+|| **Node 1** | DRBD Primario | `192.168.10.231/24` | `node1` |
+|| **Node 2** | DRBD Secundario | `192.168.10.232/24` | `node2` |
+|| **Node 3** | Host Docker | `192.168.10.233/24` | `node3-docker` |
+|| **VIP** | IP Flotante | `192.168.10.230/24` | `cluster-vip` |
+|| **Temporal** | Durante instalación | `10.0.0.69/8` | `preseed` |
 
 ### Requisitos del sistema
 

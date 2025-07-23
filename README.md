@@ -4,33 +4,16 @@
 [![DRBD Version](https://img.shields.io/badge/DRBD-9.x-green.svg)](https://linbit.com/drbd/)
 [![Pacemaker](https://img.shields.io/badge/Pacemaker-2.x-orange.svg)](https://clusterlabs.org/)
 [![Docker](https://img.shields.io/badge/Docker-20.x+-blue.svg)](https://docker.com/)
-[![NFS](https://img.shields.io/badge/NFS-v4-lightblue.svg)](https://en.wikipedia.org/wiki/Network_File_System)
-[![Linux](https://img.shields.io/badge/OS-Linux-red.svg)](https://www.linux.org/)
-[![High Availability](https://img.shields.io/badge/HA-Cluster-brightgreen.svg)](#)
-[![Lab Environment](https://img.shields.io/badge/Environment-Laboratory-purple.svg)](#)
-[![Architecture](https://img.shields.io/badge/Type-Architecture%20Design-blue.svg)](#)
 
-## Descripción
+> **Laboratorio de alta disponibilidad** que implementa almacenamiento centralizado para Docker usando DRBD + Pacemaker + NFS con failover automático.
 
-Diseño de arquitectura y laboratorio de pruebas para implementar una solución de alta disponibilidad para almacenamiento de contenedores Docker utilizando DRBD (Distributed Replicated Block Device) con gestión de clúster Pacemaker y servicios NFS. Este repositorio contiene las instrucciones detalladas y configuraciones necesarias para crear un entorno de laboratorio que demuestre esta arquitectura de alta disponibilidad.
+## ⚡ Características principales
 
-## Últimos cambios
-
-**Última actualización:** 2025-07-23
-
-- ✅ **Corrección integral de inconsistencias** - Unificación del esquema de red y especificaciones
-- ✅ **Documentación de vmbr2** - Explicación completa de configuración de red dedicada
-- ✅ **Especificaciones unificadas** - Hardware consolidado a 4GB RAM en todos los nodos
-- ✅ **Herramientas completas** - Documentación exhaustiva de dependencias y requisitos
-- ✅ **Referencias consistentes** - Eliminación de duplicaciones y enlaces verificados
-
-## Características principales
-
-- ✅ **Alta disponibilidad** - Failover automático con tiempo de inactividad mínimo
-- ✅ **Consistencia de datos** - Replicación síncrona garantiza integridad
-- ✅ **Failover transparente** - Las aplicaciones continúan ejecutándose durante el failover
-- ✅ **Almacenamiento centralizado** - Punto único de gestión de almacenamiento para contenedores
-- ✅ **Escalabilidad** - Fácil adición de nuevos hosts Docker como clientes NFS
+- **Failover automático** en 30-60 segundos
+- **Replicación síncrona** de datos con DRBD
+- **Almacenamiento centralizado** vía NFS
+- **Zero downtime** para aplicaciones Docker
+- **Arquitectura de 3 nodos** escalable
 
 ## Documentación
 
@@ -53,17 +36,18 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
    - Describe cómo integrar Docker con el almacenamiento NFS proporcionado por el clúster DRBD.
 
 5. **Desplegar una WebApp simple en Docker y que se almacene en el NFS**
-   - Configuración basada en el entorno requerirá pasos manuales (no documentados aquí).
+   - Consulte la guía: [🐳 Despliegue de WebApp con Docker y NFS](docs/DOCKER_WEBAPP_DEPLOYMENT.md).
 
 6. **Probar dar de baja el nodo primario de DRBD y que la WebApp de Docker siga operativa con el failover**
-   - Asegúrese de que el failover de DRBD esté configurado correctamente siguiendo las guías previas.
-   - Probar el failover simulando un fallo en el nodo primario para verificar que el nodo secundario tome el control sin interrupciones.
+   - Consulte la guía: [🔄 Pruebas de Failover DRBD](docs/DRBD_FAILOVER_TEST.md).
 
 ### 📚 Guías adicionales
 
 | Documento | Descripción |
 |-----------|-------------|
 | [📐 **Arquitectura del sistema**](docs/ARCHITECTURE.md) | Diseño completo y componentes de la arquitectura DRBD |
+| [🐳 **Despliegue de WebApp con Docker**](docs/DOCKER_WEBAPP_DEPLOYMENT.md) | Guía para desplegar aplicaciones web usando Docker y NFS |
+| [🔄 **Pruebas de Failover DRBD**](docs/DRBD_FAILOVER_TEST.md) | Guía completa para probar el failover del clúster DRBD |
 | [📝 **Changelog**](CHANGELOG.md) | Historial de cambios del proyecto |
 
 ## Componentes del sistema
@@ -117,90 +101,14 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 
 ## 🚀 Inicio rápido
 
-Para comenzar con la implementación del clúster DRBD de alta disponibilidad, sigue estos pasos:
-
-### 1. Revisa la arquitectura
-```bash
-# Lee primero la documentación de arquitectura
-cat docs/ARCHITECTURE.md
-```
-
-### 2. Instalación automatizada con Debian (Recomendado)
-
-#### Para entornos Proxmox con instalación desatendida:
-
-**🎆 Método 1: Automatización completa con script (Recomendado)**
-```bash
-# 1. En el host Proxmox, ejecutar script de automatización
-./scripts/create-drbd-vms.sh
-# Crea automáticamente las 3 VMs con ISO preseed
-
-# 2. Instalación escalonada (importante para evitar colisiones IP)
-qm start 231  # Node1 - esperar ~10 min
-qm start 232  # Node2 - cuando Node1 esté listo
-qm start 233  # Node3 - cuando Node2 esté listo
-
-# 3. Configurar red en cada VM post-instalación
-ssh incognia@10.0.0.69
-sudo ./config-network.sh
-# Repetir para cada VM con IPs finales: 231, 232, 233
-```
-
-**🛠️ Método 2: Creación manual de VMs**
-```bash
-# 1. Crear VMs manualmente usando la ISO personalizada
-# Usar: debian/debian-12.11.0-amd64-preseed.iso
-# Ver: docs/PROXMOX_VM_CREATION.md
-
-# 2. La instalación se ejecuta automáticamente con:
-# - Usuario: incognia (con sudo y SSH)
-# - Red estática: 10.0.0.69/8 (reconfigurar post-instalación)
-# - Paquetes preinstalados: SSH, herramientas de sistema
-
-# 3. Reconfigurar red post-instalación
-sudo ./config-network.sh
-
-# 4. Seguir guía de configuración post-instalación
-cat docs/PROXMOX_DEBIAN.md
-```
-
-#### Crear ISO personalizada (opcional):
-```bash
-# Si necesitas generar la ISO personalizada
-cd debian/
-./create-preseed-iso.sh
-# Genera: debian-12.11.0-amd64-preseed.iso
-```
-
-### 3. Métodos de instalación alternativos
-
-#### Instalación general (cualquier Linux)
-```bash
-# Sigue la guía general de instalación
-cat docs/INSTALLATION.md
-```
-
-#### Instalación manual para Proxmox + Debian
-```bash
-# Para instalación manual tradicional
-cat docs/PROXMOX_DEBIAN.md
-```
-
-### 3. Verificación post-instalación
-
-```bash
-# Verificar estado del clúster DRBD
-drbdadm status docker-vol
-
-# Verificar estado de Pacemaker
-pcs status
-
-# Verificar montajes NFS
-showmount -e 192.168.10.230
-
-# Verificar Docker
-docker info
-```
+1. **Lee la arquitectura**: `cat docs/ARCHITECTURE.md`
+2. **Sigue los pasos ordenados** en la sección "Proceso de Configuración Paso a Paso" anterior
+3. **Verifica la instalación**:
+   ```bash
+   pcs status                    # Estado del clúster
+   drbdadm status docker-vol     # Estado DRBD
+   showmount -e 192.168.10.230   # Servicios NFS
+   ```
 
 ## ⚡ Proceso de failover automático
 

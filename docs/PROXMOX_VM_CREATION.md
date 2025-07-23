@@ -7,8 +7,26 @@ Esta guía describe cómo crear las máquinas virtuales necesarias para el labor
 - **Acceso privilegiado**: SSH como `root` o usuario con permisos para gestionar VMs
 - **ISO personalizada recomendada**: `debian/debian-12.11.0-amd64-preseed.iso` (instalación automatizada)
 - **ISO alternativa**: Template o ISO estándar de Debian 12.11+ para instalación manual
-- Red bridge `vmbr2` configurada
-- Espacio suficiente en almacenamiento
+- **Red bridge `vmbr2` configurada**: Bridge de red dedicado para el laboratorio
+- **Espacio suficiente en almacenamiento**: Mínimo 200GB disponibles
+
+### 🌐 Configuración de red (vmbr2)
+
+**¿Por qué vmbr2 y no vmbr0?**
+- `vmbr0` suele estar configurado para la red de administración de Proxmox
+- `vmbr2` se usa como red dedicada para el laboratorio DRBD, aislando el tráfico del clúster
+- Permite configurar una subred específica (`192.168.10.0/24`) sin conflictos
+
+**Configuración requerida de vmbr2:**
+```bash
+# Ejemplo de configuración en /etc/network/interfaces
+auto vmbr2
+iface vmbr2 inet static
+    address 192.168.10.1/24
+    bridge-ports none
+    bridge-stp off
+    bridge-fd 0
+```
 
 ### ⚠️ Importante: Instalación escalonada recomendada
 

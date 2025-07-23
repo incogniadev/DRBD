@@ -20,7 +20,6 @@ La instalación automatizada está configurada para desplegar un servidor Debian
 - `config-network.sh` - Script interactivo para reconfigurar IP y hostname post-instalación
 - `preseed-example.cfg` - Archivo de ejemplo oficial de Debian
 - `create-preseed-iso.sh` - Script automatizado para generar ISO personalizada con soporte UEFI/BIOS híbrido
-- `backups/` - Directorio con respaldos de configuraciones anteriores
 
 ## Configuración del sistema
 
@@ -213,9 +212,15 @@ rm -rf iso_custom iso_mount
 
 Para crear la ISO personalizada necesitas:
 
+**Herramientas principales:**
 - **genisoimage** o **mkisofs**: Para crear archivos ISO
+- **isohybrid**: Para crear imágenes híbridas BIOS/UEFI (incluido con syslinux-utils)
 - **mount/umount**: Para montar ISOs (requiere sudo)
-- **find, md5sum**: Herramientas del sistema (generalmente ya instaladas)
+
+**Herramientas del sistema (generalmente ya instaladas):**
+- **find, md5sum**: Para generar checksums
+- **cp, chmod**: Herramientas básicas de archivos
+- **bash**: Shell para ejecutar scripts
 
 ```bash
 # En Fedora/CentOS/RHEL
@@ -372,15 +377,6 @@ d-i pkgsel/include string openssh-server sudo build-essential curl wget git nano
 3. **Red:** La configuración de red está optimizada para el entorno de Faraday
 4. **Permisos:** El usuario incognia tiene acceso sudo completo
 
-## Respaldos
-
-El directorio `backups/` contiene versiones anteriores del archivo preseed con timestamps:
-
-```
-backups/debian-preseed_YYYY-MM-DDTHH-MM-SS-TZ.bkp
-```
-
-Esta convención sigue las mejores prácticas para versionado y trazabilidad de cambios.
 
 ## Resolución de problemas
 

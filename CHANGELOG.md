@@ -5,6 +5,9 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-07-23: Guías específicas de despliegue y pruebas de failover
+  - Creada docs/DOCKER_WEBAPP_DEPLOYMENT.md para despliegue de WebApp con Docker y NFS
+  - Creada docs/DRBD_FAILOVER_TEST.md para pruebas completas de failover del clúster
 - 2025-07-23: Proceso de configuración paso a paso en README.md con orden secuencial de guías
 - 2025-07-23: Fecha de última actualización en README.md con formato consistente (2025-07-23)
 - 2025-07-23: Actualización de README.md con sección de últimos cambios destacando mejoras recientes
@@ -49,6 +52,10 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Comandos de gestión y monitoreo de VMs en Proxmox
 
 ### Cambiado
+- 2025-07-23: Simplificada estructura del README.md eliminando contenido redundante y mejorando navegación
+  - Reducida sección de "Inicio rápido" eliminando duplicaciones
+  - Reorganizado contenido para mejor flujo de lectura
+  - Eliminadas secciones duplicadas de características
 - 2025-07-23: Fusionado DRBD_Architecture_Diagram.md en docs/ARCHITECTURE.md para eliminar duplicación
 - 2025-07-23: Actualizada estructura del proyecto eliminando redundancias en información de IPs y configuración de red
 - 2025-07-23: Centralizada información de configuración del laboratorio en docs/INSTALLATION.md

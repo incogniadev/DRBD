@@ -176,16 +176,27 @@ graph TB
 ## Configuración de red
 
 ### Esquema de direcciones IP
+
+**⚠️ Nota importante:** Durante la instalación automatizada, todas las VMs usan temporalmente la IP `10.0.0.69/8` y deben ser reconfiguradas individualmente después de la instalación.
+
+#### Red de producción (configuración final):
 - **Nodo 1 (DRBD primario)**:
-  - Administración: `10.0.0.231/8`
-  - Clúster: `192.168.10.231/24`
+  - IP principal: `192.168.10.231/24`
+  - Hostname: `node1`
 - **Nodo 2 (DRBD secundario)**:
-  - Administración: `10.0.0.232/8`
-  - Clúster: `192.168.10.232/24`
+  - IP principal: `192.168.10.232/24`
+  - Hostname: `node2`
 - **Nodo 3 (Host Docker)**:
-  - Administración: `10.0.0.233/8`
-  - Clúster: `192.168.10.233/24`
+  - IP principal: `192.168.10.233/24`
+  - Hostname: `node3-docker`
 - **IP flotante**: `192.168.10.230/24` (IP virtual para HA)
+- **Gateway**: `192.168.10.1`
+- **DNS**: `8.8.8.8, 8.8.4.4`
+
+#### Red temporal (durante instalación):
+- **IP temporal**: `10.0.0.69/8` (todas las VMs durante instalación preseed)
+- **Gateway temporal**: `10.0.0.1`
+- **Hostname temporal**: `preseed`
 
 ### Requisitos de red
 - **Baja latencia**: <1ms idealmente entre nodos DRBD
