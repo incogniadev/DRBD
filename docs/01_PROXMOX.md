@@ -128,6 +128,8 @@ qm list
 
 ### Uso de debian-12.11.0-amd64-preseed.iso
 
+**📦 Obtener la ISO personalizada**: Para instrucciones detalladas sobre cómo crear la ISO personalizada con preseed, consulta [debian/README.md](../debian/README.md).
+
 Si estás usando la ISO personalizada, la instalación será completamente automatizada:
 
 ```bash
