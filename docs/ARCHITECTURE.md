@@ -79,12 +79,14 @@ graph TB
     C3 -.->|"Iniciar/Detener"| B4
     C4 -.->|"Gestionar"| A5
     
-    %% Acceso de aplicación
+    %% Acceso de aplicación - Docker Engine hacia NFS (red de clúster)
     D1 --> D2
-    D2 -->|"Montaje NFS"| A5
-    D2 --> D3
-    D2 --> D4
-    D2 --> D5
+    D2 -->|"Montaje NFS<br/>192.168.10.0/24"| A5
+    
+    %% Aplicaciones Docker hacia usuarios (red de administración)
+    D1N -.->|"Apps Docker<br/>10.0.0.0/8"| D3
+    D1N -.->|"Apps Docker<br/>10.0.0.0/8"| D4
+    D1N -.->|"Apps Docker<br/>10.0.0.0/8"| D5
     
     %% Reporte de standby
     B5 -.->|"Reporte de estado"| C1
@@ -124,12 +126,13 @@ graph TB
 - **Gestión NFS**: Controla el servicio NFS activo
 
 ### Nodo 3: Host Docker
-- **Cliente NFS**: Se conecta al servicio NFS vía IP flotante
-- **Almacenamiento de contenedores**: Imágenes y contenedores almacenados en NFS
+- **Cliente NFS**: Se conecta al servicio NFS vía IP flotante en red de clúster
+- **Aplicaciones Docker**: Ejecutan en red de administración para acceso de usuarios
+- **Almacenamiento de contenedores**: Imágenes y contenedores almacenados en NFS (red de clúster)
 - **Configuración de red**:
-  - **IP primaria**: `10.0.0.233/8` - Red de administración
-  - **IP secundaria**: `192.168.10.233/24` - Red del clúster
-  - **Acceso NFS**: Se conecta a la IP flotante `192.168.10.230/24`
+  - **IP primaria**: `10.0.0.233/8` - Red de administración (aplicaciones Docker, SSH, gestión)
+  - **IP secundaria**: `192.168.10.233/24` - Red del clúster (montajes NFS hacia `192.168.10.230`)
+  - **Acceso NFS**: Montajes desde `192.168.10.233` hacia IP flotante `192.168.10.230`
 
 ## Principios clave de diseño
 
@@ -232,10 +235,18 @@ iface ens19 inet static
 ### Requisitos de red
 - **Baja latencia**: <1ms idealmente entre nodos DRBD en red de clúster
 - **Red dual segregada**: 
-  - Red de administración: `10.0.0.0/8` para SSH, gestión y acceso general
-  - Red de clúster: `192.168.10.0/24` para tráfico DRBD, Pacemaker y NFS
-- **Ancho de banda**: Suficiente para transferencias de imágenes Docker y datos de contenedores
+  - **Red de administración (`10.0.0.0/8`)**: SSH, gestión, **aplicaciones Docker** y acceso de usuarios
+  - **Red de clúster (`192.168.10.0/24`)**: TRÁFICO DRBD, Pacemaker, **montajes NFS** e IP flotante
+- **Ancho de banda**: Suficiente para:
+  - Transferencias de imágenes Docker y datos de contenedores (red de clúster)
+  - Tráfico de aplicaciones hacia usuarios (red de administración)
 - **Aislamiento**: Separación física o lógica entre redes de administración y clúster
+
+#### Flujo de tráfico por red:
+- **Aplicaciones Docker** → Usuarios: Red de administración (`10.0.0.0/8`)
+- **Docker Engine** → NFS (almacenamiento): Red de clúster (`192.168.10.0/24`)
+- **DRBD replicación**: Red de clúster (`192.168.10.0/24`)
+- **Pacemaker heartbeat**: Red de clúster (`192.168.10.0/24`)
 
 ## Diagrama técnico de arquitectura DRBD
 
