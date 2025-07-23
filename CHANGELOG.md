@@ -5,6 +5,9 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-07-23: Añadido diagrama de arquitectura DRBD en formato PNG (DRBD_Diagram_V1.1.png)
+- 2025-07-23: Creado diagrama Mermaid de la arquitectura DRBD (DRBD_Architecture_Diagram.md)
+- 2025-07-23: Documentación completa de la arquitectura con descripción de componentes y flujo de datos
 - 2025-07-21: Creado directorio docs/ dedicado para la documentación organizada
 - 2025-07-21: Añadido ARCHITECTURE.md detallado con el diseño del sistema
 - 2025-07-21: Añadida guía general INSTALLATION.md para todas las distribuciones de Linux
