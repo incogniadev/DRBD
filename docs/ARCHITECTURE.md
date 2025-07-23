@@ -137,22 +137,45 @@ graph TB
 ## Principios clave de diseño
 
 ### Arquitectura de almacenamiento Docker
-**TODAS las imágenes y contenedores Docker DEBEN almacenarse en el almacenamiento montado por NFS proporcionado por el clúster DRBD.**
 
-#### Componentes de almacenamiento
-- **Imágenes Docker**: Almacenadas en `/mnt/docker-vol/docker/images/` en NFS
-- **Datos de contenedores**: Todos los volúmenes de contenedores y datos persistentes en NFS
-- **Daemon Docker**: Configurado para usar directorios montados en NFS para:
-  - Almacenamiento de imágenes
-  - Datos de tiempo de ejecución de contenedores
-  - Montajes de volúmenes
-  - Caché de construcción
+**⚠️ REGLA FUNDAMENTAL: TODOS los componentes de Docker DEBEN almacenarse en NFS, NO en el almacenamiento local del servidor Docker.**
 
-#### Rol del host Docker
-- **Solo ejecución**: El servidor Docker (Nodo 3) sirve únicamente como motor de ejecución
-- **Sin almacenamiento local**: No hay imágenes o datos persistentes almacenados localmente
-- **Dependencia de NFS**: Dependencia completa de NFS para todas las operaciones Docker
-- **Operación sin estado**: Puede ser reemplazado o reconstruido sin pérdida de datos
+#### 💾 Almacenamiento Docker en NFS (OBLIGATORIO)
+TODOS los siguientes componentes DEBEN configurarse para usar el almacenamiento NFS montado:
+
+- **Imágenes Docker**: Almacenadas en `/mnt/nfs/docker/images/` (NFS)
+- **Contenedores**: Todos los contenedores y sus capas en `/mnt/nfs/docker/containers/` (NFS)
+- **Volúmenes Docker**: Todos los volúmenes en `/mnt/nfs/docker/volumes/` (NFS)
+- **Datos de aplicaciones**: Datos persistentes de aplicaciones en NFS
+- **Caché de construcción**: Build cache en `/mnt/nfs/docker/buildkit/` (NFS)
+- **Registros de contenedores**: Logs en `/mnt/nfs/docker/containers/*/` (NFS)
+- **Configuración del daemon**: Docker daemon configurado con `data-root` apuntando a NFS
+
+#### 🚫 Prohibido en almacenamiento local
+- **NO** usar `/var/lib/docker/` (almacenamiento local)
+- **NO** almacenar imágenes en disco local del servidor
+- **NO** crear volúmenes en storage local
+- **NO** usar bind mounts a directorios locales para datos persistentes
+
+#### Configuración del Docker Daemon
+```json
+{
+  "data-root": "/mnt/nfs/docker",
+  "storage-driver": "overlay2",
+  "log-driver": "json-file",
+  "log-opts": {
+    "max-size": "10m",
+    "max-file": "3"
+  }
+}
+```
+
+#### Rol del host Docker (Nodo 3)
+- **⚡ Solo ejecución**: El servidor sirve únicamente como motor de ejecución Docker
+- **🚫 Sin almacenamiento local**: CERO imágenes, contenedores o datos persistentes en disco local
+- **🔗 100% dependiente de NFS**: Toda operación Docker depende del almacenamiento NFS
+- **🔄 Completamente sin estado**: El servidor puede ser destruido y recreado sin pérdida de datos
+- **💾 Punto de montaje único**: Todo Docker almacenado en `/mnt/nfs/` (montaje NFS)
 
 ## Proceso de failover
 
@@ -172,12 +195,29 @@ graph TB
 - ✅ **Almacenamiento centralizado** - Punto único de gestión de almacenamiento
 - ✅ **Escalabilidad** - Fácil adición de hosts de ejecución Docker
 
-### Beneficios del almacenamiento centralizado NFS
-1. **Alta disponibilidad**: Las imágenes y contenedores sobreviven a fallas del host Docker
-2. **Consistencia**: Las mismas imágenes disponibles en múltiples hosts Docker
-3. **Simplicidad de respaldos**: Ubicación única de almacenamiento para todos los datos Docker
-4. **Escalabilidad**: Fácil agregar más hosts de ejecución Docker
-5. **Recuperación ante desastres**: Restauración completa del entorno Docker desde la réplica DRBD
+### Beneficios del almacenamiento 100% NFS para Docker
+1. **🔥 Falla total del servidor**: Si el servidor Docker se destruye completamente, CERO pérdida de datos
+2. **🔄 Reemplazo instantáneo**: Nuevo servidor Docker listo en minutos montando el mismo NFS
+3. **💾 Consistencia absoluta**: Mismas imágenes y contenedores disponibles desde cualquier host
+4. **🛡️ Respaldos centralizados**: Un solo punto de respaldo para todo el entorno Docker
+5. **⚙️ Escalabilidad sin límites**: Múltiples hosts Docker pueden usar el mismo almacenamiento
+6. **🔁 Recuperación instantánea**: Failover de DRBD = TODO el entorno Docker disponible inmediatamente
+7. **🧠 Administración simplificada**: Un solo sistema de archivos para gestionar todo Docker
+8. **📊 Monitoreo centralizado**: Todos los logs y métricas en una ubicación
+
+### ⚠️ Implicaciones críticas del almacenamiento NFS obligatorio
+
+#### Ventajas operativas:
+- **Host Docker es desechable**: El servidor puede ser recreado sin afectar aplicaciones
+- **Mantenimiento sin downtime**: Migración de cargas a otro host mientras se mantiene el servidor
+- **Actualizaciones seguras**: Actualizar SO/Docker sin riesgo de pérdida de datos
+- **Testing sin riesgo**: Probar configuraciones en hosts temporales
+
+#### Consideraciones de rendimiento:
+- **Latencia de red**: Todas las operaciones Docker dependen de la latencia hacia NFS
+- **Ancho de banda crítico**: Operaciones de imágenes grandes requieren ancho de banda adecuado
+- **Optimización NFS**: Configuración de NFS debe optimizarse para cargas Docker
+- **Red de clúster dedicada**: TRÁFICO NFS debe ir por red de clúster (`192.168.10.0/24`)
 
 ## Configuración de red
 
