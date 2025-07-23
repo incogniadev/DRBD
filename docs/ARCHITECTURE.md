@@ -14,7 +14,7 @@ graph TB
             A1["/dev/sdb1<br/>Dispositivo físico"]
             A2["/dev/drbd0<br/>DRBD primario"]
             A3["/mnt/docker-vol<br/>Sistema de archivos montado"]
-            A3a["Imágenes Docker<br/>y datos de contenedores"]
+            A3a["📦 TODO Docker Storage:<br/>• Imágenes (/images/)<br/>• Contenedores (/containers/)<br/>• Volúmenes (/volumes/)<br/>• Logs y Cache"]
             A4["Servidor NFS<br/>(Activo)"]
             A5["192.168.10.230<br/>IP flotante"]
         end
@@ -24,7 +24,7 @@ graph TB
             B1["/dev/sdb1<br/>Dispositivo físico"]
             B2["/dev/drbd0<br/>DRBD secundario"]
             B3["/mnt/docker-vol<br/>Desmontado"]
-            B3a["Imágenes Docker<br/>y datos de contenedores<br/>(Réplica)"]
+            B3a["📦 TODO Docker Storage:<br/>(Réplica sincronizada)<br/>• Imágenes (/images/)<br/>• Contenedores (/containers/)<br/>• Volúmenes (/volumes/)"]
             B4["Servidor NFS<br/>(En espera)"]
             B5["Agente Pacemaker<br/>(En espera)"]
         end
@@ -39,8 +39,8 @@ graph TB
     
     subgraph "Capa de aplicación"
         D1N["Admin: 10.0.0.233/8<br/>Cluster: 192.168.10.233/24"]
-        D1["Host Docker<br/>(node3-docker)"]
-        D2["Cliente NFS"]
+        D1["⚡ Host Docker (STATELESS)<br/>(node3-docker)<br/>🚫 SIN almacenamiento local"]
+        D2["Cliente NFS<br/>📦 TODO storage en NFS"]
         D3["Contenedor 1"]
         D4["Contenedor 2"]
         D5["Contenedor N"]
