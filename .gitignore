@@ -1,5 +1,7 @@
 # Archivos ISO (imágenes de instalación)
 *.iso
+debian/*.iso
+debian/debian-*.iso
 
 # Archivos de respaldo temporales
 *.bak
@@ -10,6 +12,9 @@
 iso_custom/
 iso_mount/
 initrd_extract/
+debian/initrd_extract/
+debian/iso_custom/
+debian/iso_mount/
 
 # Archivos de logs
 *.log
