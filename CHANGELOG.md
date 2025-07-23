@@ -117,6 +117,17 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Eliminadas instrucciones de instalación de README.md (movidas a guías dedicadas)
 
 ### Corregido
+- 2025-07-23: **Corrección de inconsistencias en configuración de red**
+  - Corregidas referencias erróneas a netplan en docs/PROXMOX_VM_CREATION.md y docs/PROXMOX_DEBIAN.md
+  - Reemplazadas configuraciones netplan/systemd-networkd con método tradicional /etc/network/interfaces
+  - Alineada documentación con implementación real de debian-preseed.cfg y config-network.sh
+  - Agregados nombres correctos de interfaces (ens18/ens19) y comandos de reinicio de servicios
+- 2025-07-23: **Corrección de IDs de VMs en comandos de Proxmox**
+  - Corregidos IDs incorrectos (101) por IDs correctos del proyecto (231, 232, 233) en sección "Comandos útiles"
+  - IDs ahora coinciden con último octeto de direcciones IP asignadas
+  - Agregados ejemplos específicos para cada nodo con comentarios explicativos
+  - Incluidas operaciones en lote para gestión eficiente del laboratorio completo
+  - Mejorada organización de comandos con identificación clara de nodos
 - 2025-07-21: Corregido marcador de fecha en la sección de autor de PROXMOX_DEBIAN_NOTES.md
 - 2025-07-21: Resuelta información redundante dispersa en varios archivos
 - 2025-07-21: Mejorada la consistencia del idioma en toda la documentación
