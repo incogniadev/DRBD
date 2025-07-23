@@ -29,6 +29,7 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-23: Actualizado README.md principal con sección de scripts de automatización y métodos de instalación
 - 2025-07-23: Actualizados requisitos de hardware en README.md para reflejar especificaciones actuales (24GB+16GB DRBD, 32GB Docker)
 - 2025-07-23: Mejorado .gitignore con reglas más específicas para directorios debian/ y archivos temporales
+- 2025-07-23: Añadidas reglas para ignorar archivos de respaldo (*.bkp) y directorios backups/ en .gitignore
 - 2025-07-21: Creado directorio docs/ dedicado para la documentación organizada
 - 2025-07-21: Añadido ARCHITECTURE.md detallado con el diseño del sistema
 - 2025-07-21: Añadida guía general INSTALLATION.md para todas las distribuciones de Linux
@@ -81,6 +82,7 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Añadido soporte completo para UEFI con disco EFI y QEMU Agent en todas las VMs
 
 ### Eliminado
+- 2025-07-23: Eliminados archivos de respaldo del repositorio (backups/*.bkp y debian/backups/*.bkp)
 - 2025-07-23: Eliminado DRBD_Architecture_Diagram.md (contenido fusionado en docs/ARCHITECTURE.md)
 - 2025-07-21: Eliminado archivo redundante OVERVIEW.md (contenido movido a docs/ARCHITECTURE.md)
 - 2025-07-21: Movido PROXMOX_DEBIAN_NOTES.md a docs/PROXMOX_DEBIAN.md

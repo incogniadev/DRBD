@@ -5,8 +5,13 @@ debian/debian-*.iso
 
 # Archivos de respaldo temporales
 *.bak
+*.bkp
 *.tmp
 *.temp
+
+# Directorios de respaldo
+backups/
+*/backups/
 
 # Directorios temporales para creación de ISO
 iso_custom/
