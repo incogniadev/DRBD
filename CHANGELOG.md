@@ -25,6 +25,11 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Comandos de gestión y monitoreo de VMs en Proxmox
 
 ### Cambiado
+- 2025-07-23: Fusionado DRBD_Architecture_Diagram.md en docs/ARCHITECTURE.md para eliminar duplicación
+- 2025-07-23: Actualizada estructura del proyecto eliminando redundancias en información de IPs y configuración de red
+- 2025-07-23: Centralizada información de configuración del laboratorio en docs/INSTALLATION.md
+- 2025-07-23: Corregidos IDs de VMs a 231, 232, 233 en toda la documentación y scripts
+- 2025-07-23: Reorganizada documentación con referencias cruzadas para evitar duplicación de contenido
 - 2025-07-23: Actualizada documentación en README.md, docs/PROXMOX_DEBIAN.md y docs/PROXMOX_VM_CREATION.md para incluir información sobre instalación automatizada con preseed
 - 2025-07-23: Reorganizada guía de instalación en docs/ para priorizar el método automatizado
 - 2025-07-23: Añadidas referencias cruzadas entre documentación tradicional y automatizada
@@ -61,6 +66,7 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 - 2025-07-21: Añadido soporte completo para UEFI con disco EFI y QEMU Agent en todas las VMs
 
 ### Eliminado
+- 2025-07-23: Eliminado DRBD_Architecture_Diagram.md (contenido fusionado en docs/ARCHITECTURE.md)
 - 2025-07-21: Eliminado archivo redundante OVERVIEW.md (contenido movido a docs/ARCHITECTURE.md)
 - 2025-07-21: Movido PROXMOX_DEBIAN_NOTES.md a docs/PROXMOX_DEBIAN.md
 - 2025-07-21: Eliminados diagramas de arquitectura duplicados en varios archivos

@@ -247,7 +247,7 @@ ISO_PATH="local:iso/debian-12.11.0-amd64-preseed.iso"
 STORAGE="local-lvm"
 
 echo "Creando VM Node1 (DRBD Primario)..."
-qm create 101 \
+qm create 231 \
   --name "node1-drbd" \
   --memory 4096 \
   --cores 2 \
@@ -257,16 +257,19 @@ qm create 101 \
   --machine q35 \
   --scsihw virtio-scsi-pci \
   --bootdisk scsi0 \
-  --scsi0 ${STORAGE}:20,format=raw \
-  --scsi1 ${STORAGE}:10,format=raw \
+  --scsi0 ${STORAGE}:24,format=raw \
+  --scsi1 ${STORAGE}:16,format=raw \
+  --efidisk0 ${STORAGE}:1,format=raw \
   --net0 virtio,bridge=vmbr2 \
+  --net1 virtio,bridge=vmbr2 \
   --agent 1 \
+  --bios ovmf \
   --onboot 1 \
   --cdrom ${ISO_PATH} \
   --boot order=scsi0
 
 echo "Creando VM Node2 (DRBD Secundario)..."
-qm create 102 \
+qm create 232 \
   --name "node2-drbd" \
   --memory 4096 \
   --cores 2 \
@@ -276,16 +279,19 @@ qm create 102 \
   --machine q35 \
   --scsihw virtio-scsi-pci \
   --bootdisk scsi0 \
-  --scsi0 ${STORAGE}:20,format=raw \
-  --scsi1 ${STORAGE}:10,format=raw \
+  --scsi0 ${STORAGE}:24,format=raw \
+  --scsi1 ${STORAGE}:16,format=raw \
+  --efidisk0 ${STORAGE}:1,format=raw \
   --net0 virtio,bridge=vmbr2 \
+  --net1 virtio,bridge=vmbr2 \
   --agent 1 \
+  --bios ovmf \
   --onboot 1 \
   --cdrom ${ISO_PATH} \
   --boot order=scsi0
 
 echo "Creando VM Node3 (Docker Host)..."
-qm create 103 \
+qm create 233 \
   --name "node3-docker" \
   --memory 4096 \
   --cores 2 \
@@ -295,20 +301,23 @@ qm create 103 \
   --machine q35 \
   --scsihw virtio-scsi-pci \
   --bootdisk scsi0 \
-  --scsi0 ${STORAGE}:30,format=raw \
+  --scsi0 ${STORAGE}:32,format=raw \
+  --efidisk0 ${STORAGE}:1,format=raw \
   --net0 virtio,bridge=vmbr2 \
+  --net1 virtio,bridge=vmbr2 \
   --agent 1 \
+  --bios ovmf \
   --onboot 1 \
   --cdrom ${ISO_PATH} \
   --boot order=scsi0
 
 echo "Iniciando todas las VMs..."
-qm start 101
-qm start 102
-qm start 103
+qm start 231
+qm start 232
+qm start 233
 
 echo "Estado de las VMs:"
-qm list | grep -E "(101|102|103)"
+qm list | grep -E "(231|232|233)"
 
 echo "Configuración completada. Proceder con instalación de Debian en cada VM."
 ```

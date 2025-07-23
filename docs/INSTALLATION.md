@@ -1,19 +1,37 @@
 # Guía de instalación de alta disponibilidad DRBD
 
-## Requisitos previos
+## Esquema de configuración del laboratorio
 
-### Requisitos de hardware
-- **Nodos DRBD**: Mínimo 2 nodos con almacenamiento local
-- **Red dedicada**: Conexión de red de baja latencia entre nodos DRBD
-- **Host Docker**: Servidor con Docker Engine instalado
+### Configuración de nodos y red
 
-### Requisitos de software
-- **Sistema operativo**: Linux (Debian 12.11+, Ubuntu 22.04+, RHEL/CentOS 9+, SLES 15+)
-- **DRBD**: Versión 9.x o superior
-- **Pacemaker**: Versión 2.x o superior
-- **Corosync**: Para comunicación del clúster
-- **NFS Utils**: Para servicios NFS
-- **Docker**: Versión 20.x o superior
+> **📍 Referencia completa**: Para detalles completos de arquitectura y configuración de red, consulta [docs/ARCHITECTURE.md](ARCHITECTURE.md).
+
+| Nodo | Función | IP Administración | IP Clúster |
+|------|---------|-------------------|---------------|
+| **Node 1** | DRBD Primario | `10.0.0.231/8` | `192.168.10.231/24` |
+| **Node 2** | DRBD Secundario | `10.0.0.232/8` | `192.168.10.232/24` |
+| **Node 3** | Host Docker | `10.0.0.233/8` | `192.168.10.233/24` |
+| **VIP** | IP Flotante | - | `192.168.10.230/24` |
+
+### Requisitos del sistema
+
+#### Hardware mínimo recomendado
+| Componente | Node 1 & 2 (DRBD) | Node 3 (Docker) |
+|------------|-------------------|------------------|
+| **CPU** | 2 vCPUs | 2 vCPUs |
+| **RAM** | 2GB (4GB recomendado) | 4GB mínimo |
+| **Almacenamiento** | 24GB SO + 16GB DRBD | 32GB |
+| **Red** | 2 interfaces (gestión + clúster) | 2 interfaces |
+
+#### Software requerido
+| Componente | Versión | Notas |
+|------------|---------|-------|
+| **Linux OS** | Debian 12.11+, Ubuntu 22.04+, RHEL/CentOS 9+ | - |
+| **DRBD** | 9.x+ | Con módulos del kernel |
+| **Pacemaker** | 2.x+ | Gestión de clúster |
+| **Corosync** | Compatible con Pacemaker | Comunicación del clúster |
+| **NFS** | v4+ | Cliente y servidor |
+| **Docker** | 20.x+ | En Node 3 únicamente |
 
 ## Pasos generales de instalación
 

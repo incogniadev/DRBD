@@ -38,12 +38,14 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 
 ### Descripción general de nodos
 
-| Nodo | Función | IP Principal | IP del Clúster | Rol |
-|------|---------|--------------|----------------|-----|
-| **Node 1** | DRBD Primario | `10.0.0.231/8` | `192.168.10.231/24` | Almacenamiento activo, NFS activo |
-| **Node 2** | DRBD Secundario | `10.0.0.232/8` | `192.168.10.232/24` | Replica en standby, NFS standby |
-| **Node 3** | Host Docker | `10.0.0.233/8` | `192.168.10.233/24` | Ejecución de contenedores |
-| **VIP** | IP Flotante | - | `192.168.10.230/24` | Punto de acceso para alta disponibilidad |
+| Nodo | Función | Rol Principal |
+|------|---------|---------------|
+| **Node 1** | DRBD Primario | Almacenamiento activo, NFS activo |
+| **Node 2** | DRBD Secundario | Replica en standby, NFS standby |
+| **Node 3** | Host Docker | Ejecución de contenedores |
+| **VIP** | IP Flotante | Punto de acceso para alta disponibilidad |
+
+> **📍 Configuración de red detallada**: Ver [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md#configuración-de-red) para el esquema completo de IPs y configuración de red.
 
 ### Características principales por nodo
 
