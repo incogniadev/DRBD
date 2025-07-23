@@ -5,6 +5,12 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-07-23T20:45:00Z: Actualización de README.md con sección de últimos cambios destacando mejoras recientes
+- 2025-07-23T21:00:00Z: Corrección integral de inconsistencias en documentación del proyecto
+- 2025-07-23T21:00:00Z: Unificación del esquema de red con explicación clara de IPs temporales vs finales
+- 2025-07-23T21:00:00Z: Documentación completa de vmbr2 con explicación de por qué no usar vmbr0
+- 2025-07-23T21:00:00Z: Especificaciones de hardware unificadas (4GB RAM) en todos los documentos
+- 2025-07-23T21:00:00Z: Herramientas requeridas completas documentadas en debian/README.md
 - 2025-07-23: Añadido directorio debian/ con herramientas de instalación automatizada de Debian 12
 - 2025-07-23: Script create-preseed-iso.sh para crear ISOs personalizadas con preseed integrado
 - 2025-07-23: Script config-network.sh para reconfiguración post-instalación de red y hostname

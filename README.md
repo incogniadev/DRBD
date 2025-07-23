@@ -14,6 +14,14 @@
 
 Diseño de arquitectura y laboratorio de pruebas para implementar una solución de alta disponibilidad para almacenamiento de contenedores Docker utilizando DRBD (Distributed Replicated Block Device) con gestión de clúster Pacemaker y servicios NFS. Este repositorio contiene las instrucciones detalladas y configuraciones necesarias para crear un entorno de laboratorio que demuestre esta arquitectura de alta disponibilidad.
 
+## Últimos cambios
+
+- ✅ **Corrección integral de inconsistencias** - Unificación del esquema de red y especificaciones
+- ✅ **Documentación de vmbr2** - Explicación completa de configuración de red dedicada
+- ✅ **Especificaciones unificadas** - Hardware consolidado a 4GB RAM en todos los nodos
+- ✅ **Herramientas completas** - Documentación exhaustiva de dependencias y requisitos
+- ✅ **Referencias consistentes** - Eliminación de duplicaciones y enlaces verificados
+
 ## Características principales
 
 - ✅ **Alta disponibilidad** - Failover automático con tiempo de inactividad mínimo
@@ -67,18 +75,18 @@ Diseño de arquitectura y laboratorio de pruebas para implementar una solución 
 
 ### 💻 Hardware mínimo recomendado
 
-| Componente | Node 1 & 2 (DRBD) | Node 3 (Docker) |
-|------------|-------------------|------------------|
-| **CPU** | 2 vCPUs | 2 vCPUs |
-| **RAM** | 4GB recomendado | 4GB mínimo |
-| **Almacenamiento** | 24GB SO + 16GB DRBD | 32GB |
-| **Red** | 2 interfaces (gestión + clúster) | 2 interfaces |
+|| Componente | Node 1 & 2 (DRBD) | Node 3 (Docker) |
+||------------|-------------------|------------------|
+|| **CPU** | 2 vCPUs | 2 vCPUs |
+|| **RAM** | 4GB | 4GB |
+|| **Almacenamiento** | 24GB SO + 16GB DRBD | 32GB |
+|| **Red** | 2 interfaces (vmbr2) | 2 interfaces (vmbr2) |
 
 ### 🛠️ Software requerido
 
 | Componente | Versión | Notas |
 |------------|---------|-------|
-|| **Linux OS** | Debian 12.11+, Ubuntu 22.04+, RHEL/CentOS 9+ | - |
+| **Linux OS** | Debian 12.11+, Ubuntu 22.04+, RHEL/CentOS 9+ | - |
 | **DRBD** | 9.x+ | Con módulos del kernel |
 | **Pacemaker** | 2.x+ | Gestión de clúster |
 | **Corosync** | Compatible con Pacemaker | Comunicación del clúster |
