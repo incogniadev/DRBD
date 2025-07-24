@@ -5,6 +5,17 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-01-24: **Creación de guía completa de configuración post-instalación de Debian**
+  - Creado docs/02_DEBIAN.md como guía integral de configuración post-instalación
+  - Incluye método automatizado con reconfiguración usando config-network.sh tras instalación preseed
+  - Incluye método manual completo para instalación tradicional paso a paso
+  - Configuración específica de red dual para cada nodo con interfaces ens18 y ens19
+  - Instalación de software específico: DRBD/Pacemaker en nodos 1-2, Docker en nodo 3
+  - Configuración de firewall diferenciada para nodos DRBD y Docker host
+  - Optimizaciones para entorno virtualizado (I/O, red, kernel)
+  - Scripts de automatización incluidos para instalación rápida por tipo de nodo
+  - Verificaciones y comandos de validación para cada etapa de configuración
+  - Actualizado README.md para reflejar la secuencia completa de documentación con 02_DEBIAN.md
 - 2025-01-24: **Optimización de especificaciones para host Docker stateless**
   - Actualizado Node3 (Docker host) con especificaciones optimizadas: 4 vCPUs, 8GB RAM, 16GB disco
   - Mantenidas especificaciones de nodos DRBD: 2 vCPUs, 4GB RAM, 24GB SO + 16GB DRBD

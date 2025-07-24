@@ -25,8 +25,9 @@
 
 2. **Configurar red y post-instalación**
    - Consulte la guía: [🌐 **Configuración de Debian**](docs/02_DEBIAN.md).
-   - Configuración de red y tareas post-instalación en las VMs.
-   - **Script mejorado**: Soporte para configuración de doble interfaz de red (administración + clúster)
+   - Configuración de red, hostnames y software específico por nodo.
+   - **Método automatizado**: Reconfiguración con `config-network.sh` tras instalación con preseed
+   - **Método manual**: Configuración completa paso a paso para instalación tradicional
    - **ISO personalizada**: [🚀 **Creación de ISO con preseed**](debian/README.md) para crear la ISO de instalación automatizada.
 
 3. **Instalar los paquetes en los nodos DRBD y configurar el clúster de almacenamiento**
