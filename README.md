@@ -74,22 +74,24 @@
 - Servicio NFS para compartir almacenamiento
 - Dispositivos: `/dev/sdb1` → `/dev/drbd0` → `/mnt/docker-vol`
 
-#### 🜵 Node 3: Host de ejecución Docker
-- **Almacenamiento 100% centralizado en NFS**
-- Sin datos persistentes locales
-- Acceso transparente vía IP flotante
-- **Configuración dual de red**: Interfaces separadas para administración (ens18) y clúster (ens19)
+#### ⚡ Node 3: Host de ejecución Docker (Stateless)
+- **💾 Almacenamiento 100% centralizado en NFS** - Cero almacenamiento local
+- **🚀 Optimizado para contenedores** - Más CPU y RAM, menos disco
+- **🔄 Completamente desechable** - Puede ser recreado sin pérdida de datos
+- **🌐 Configuración dual de red**: Interfaces separadas para administración (ens18) y clúster (ens19)
+- **🚫 Sin persistencia local**: Solo SO en 16GB, TODO en NFS
 
 ## Requisitos del sistema
 
 ### 💻 Hardware mínimo recomendado
 
-| Componente | Node 1 & 2 (DRBD) | Node 3 (Docker) |
-|------------|-------------------|------------------|
-| **CPU** | 2 vCPUs | 2 vCPUs |
-| **RAM** | 4GB | 4GB |
-| **Almacenamiento** | 24GB SO + 16GB DRBD | 32GB |
+| Componente | Node 1 & 2 (DRBD) | Node 3 (Docker Stateless) |
+|------------|-------------------|--------------------------|
+| **CPU** | 2 vCPUs | 4 vCPUs |
+| **RAM** | 4GB | 8GB |
+| **Almacenamiento** | 24GB SO + 16GB DRBD | 16GB (solo SO) |
 | **Red** | 2 interfaces (vmbr2) | 2 interfaces (vmbr2) |
+| **Función** | Almacenamiento + NFS | Ejecución sin estado |
 
 ### 🛠️ Software requerido
 
@@ -173,6 +175,6 @@ Diseño de arquitectura por Rodrigo Ernesto Álvarez Aguilera (@incogniadev) - I
 
 ---
 
-**📅 Última actualización**: 2025-07-23 - Mejoras en configuración de red con soporte para doble interfaz en laboratorios DRBD
+**📅 Última actualización**: 2025-07-24 - Optimización de especificaciones para host Docker stateless con mayor rendimiento
 
 *Esta arquitectura proporciona una base robusta para cargas de trabajo containerizadas que requieren almacenamiento persistente y altamente disponible.*

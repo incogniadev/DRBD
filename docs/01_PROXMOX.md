@@ -34,20 +34,22 @@ iface vmbr2 inet static
 
 ## Especificaciones de las VMs
 
-### Nodos DRBD (Node1 y Node2)
+### Nodos DRBD (Node1 y Node2) - Almacenamiento
 - **CPU**: 2 vCPUs
 - **RAM**: 4GB 
 - **Disco principal**: 24GB (sistema operativo)
 - **Disco secundario**: 16GB (DRBD storage)
 - **Red**: 2x vmbr2 (administración + clúster)
 - **OS**: Debian 12.11+
+- **Función**: Almacenamiento replicado + NFS
 
-### Host Docker (Node3)
-- **CPU**: 2 vCPUs
-- **RAM**: 4GB
-- **Disco**: 32GB (sistema + contenedores)
+### Host Docker (Node3) - Ejecución Stateless
+- **CPU**: 4 vCPUs (⚡ optimizado para contenedores)
+- **RAM**: 8GB (🚀 más memoria para workloads)
+- **Disco**: 16GB (💾 solo SO, sin persistencia)
 - **Red**: 2x vmbr2 (administración + clúster)
 - **OS**: Debian 12.11+
+- **Función**: 🚫 Motor de ejecución sin estado
 
 ## Creación de VMs desde shell de Proxmox
 
@@ -86,8 +88,8 @@ qm set 232 --cdrom local:iso/debian-12.11.0-amd64-preseed.iso
 ### 4. Crear VM Node3 (Docker Host)
 
 ```bash
-# Crear VM con ID 233
-qm create 233 --name "node3-docker" --memory 4096 --cores 2 --sockets 1 --cpu host --ostype l26 --machine q35 --scsihw virtio-scsi-pci --bootdisk scsi0 --scsi0 local-lvm:32,format=raw --efidisk0 local-lvm:1,format=raw --net0 virtio,bridge=vmbr2 --net1 virtio,bridge=vmbr2 --agent 1 --bios ovmf --onboot 1
+# Crear VM con ID 233 - Optimizada para contenedores
+qm create 233 --name "node3-docker" --memory 8192 --cores 4 --sockets 1 --cpu host --ostype l26 --machine q35 --scsihw virtio-scsi-pci --bootdisk scsi0 --scsi0 local-lvm:16,format=raw --efidisk0 local-lvm:1,format=raw --net0 virtio,bridge=vmbr2 --net1 virtio,bridge=vmbr2 --agent 1 --bios ovmf --onboot 1
 
 # Configurar orden de boot
 qm set 233 --boot order=scsi0
@@ -221,18 +223,18 @@ qm create 232 \
   --cdrom ${ISO_PATH} \
   --boot order=scsi0
 
-echo "Creando VM Node3 (Docker Host)..."
+echo "Creando VM Node3 (Docker Host - Optimizada para contenedores)..."
 qm create 233 \
   --name "node3-docker" \
-  --memory 4096 \
-  --cores 2 \
+  --memory 8192 \
+  --cores 4 \
   --sockets 1 \
   --cpu host \
   --ostype l26 \
   --machine q35 \
   --scsihw virtio-scsi-pci \
   --bootdisk scsi0 \
-  --scsi0 ${STORAGE}:32,format=raw \
+  --scsi0 ${STORAGE}:16,format=raw \
   --efidisk0 ${STORAGE}:1,format=raw \
   --net0 virtio,bridge=vmbr2 \
   --net1 virtio,bridge=vmbr2 \

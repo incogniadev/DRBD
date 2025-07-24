@@ -5,6 +5,15 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-01-24: **Optimización de especificaciones para host Docker stateless**
+  - Actualizado Node3 (Docker host) con especificaciones optimizadas: 4 vCPUs, 8GB RAM, 16GB disco
+  - Mantenidas especificaciones de nodos DRBD: 2 vCPUs, 4GB RAM, 24GB SO + 16GB DRBD
+  - Actualizado diagrama Mermaid en docs/ARCHITECTURE.md para reflejar ubicación explícita del almacenamiento Docker en NFS
+  - Actualizada documentación en docs/01_PROXMOX.md con comandos qm create optimizados para Node3
+  - Actualizado script de automatización create-drbd-vms.sh con especificaciones mejoradas
+  - Mejorada coherencia entre README.md, ARCHITECTURE.md y documentación de Proxmox
+  - Enfatizada naturaleza stateless del host Docker con comentarios descriptivos y emojis
+  - Optimizada asignación de recursos para mejor rendimiento de contenedores
 - 2025-01-21: **Mejoras en configuración de red para soporte de interfaz dual**
   - Añadido soporte para configuración de interfaz de red secundaria en config-network.sh
   - Implementada detección automática de interfaces de red para configuración dual
