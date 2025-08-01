@@ -2,6 +2,10 @@
 *.iso
 debian/*.iso
 debian/debian-*.iso
+ubuntu/*.iso
+ubuntu/ubuntu-*.iso
+# Archivos temporales de descarga de ISO
+.*iso.*
 
 # Archivos de respaldo temporales
 *.bak
@@ -20,6 +24,9 @@ initrd_extract/
 debian/initrd_extract/
 debian/iso_custom/
 debian/iso_mount/
+ubuntu/initrd_extract/
+ubuntu/iso_custom/
+ubuntu/iso_mount/
 
 # Archivos de logs
 *.log

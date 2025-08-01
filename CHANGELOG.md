@@ -5,6 +5,26 @@ Todos los cambios notables de este proyecto se documentarán en este archivo.
 ## [No publicado]
 
 ### Añadido
+- 2025-07-31: **Soporte completo UEFI/BIOS híbrido para Ubuntu 24.04.2**
+  - Implementado soporte completo UEFI con partición EFI dedicada (10MB)
+  - Integrado xorriso para crear imágenes híbridas compatibles con BIOS Legacy y UEFI
+  - Actualizado create-preseed-iso.sh v2.0 con soporte híbrido automático
+  - Optimizado para Proxmox con compatibilidad SeaBIOS (BIOS) y OVMF (UEFI)
+  - Verificación automática de particiones EFI con fdisk y herramientas de diagnóstico
+  - Imagen booteable desde USB, CD/DVD y plataformas de virtualización
+- 2025-07-31: **Organización y limpieza del directorio ubuntu/**
+  - Eliminados archivos remanentes de Debian (debian-preseed.cfg, preseed-example.cfg)
+  - Renombrados scripts a nombres estándar: create-preseed-iso.sh, config-network.sh
+  - Actualizado README.md principal con referencias correctas a archivos actuales
+  - Estructura limpia y enfocada exclusivamente en Ubuntu 24.04.2 LTS
+- 2025-07-31: **Añadido directorio ubuntu/ con herramientas de instalación automatizada**
+  - Creado directorio ubuntu/ con scripts y configuraciones para Ubuntu Server 24.04.2 LTS
+  - Incluye script create-preseed-iso.sh para crear ISOs personalizadas con preseed integrado
+  - Incluye script config-network.sh para reconfiguración post-instalación de red y hostname
+  - Archivo de configuración ubuntu-preseed.cfg para instalación desatendida
+  - Documentación completa en ubuntu/README.md con guías de uso y resolución de problemas
+  - Actualizado .gitignore para excluir archivos ISO y temporales específicos de Ubuntu
+  - Scripts adaptados de debian/ con configuraciones específicas para Ubuntu Live Server
 - 2025-01-24: **Creación de guía completa de configuración post-instalación de Debian**
   - Creado docs/02_DEBIAN.md como guía integral de configuración post-instalación
   - Incluye método automatizado con reconfiguración usando config-network.sh tras instalación preseed
