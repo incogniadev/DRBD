@@ -1,21 +1,21 @@
 #!/bin/bash
 
-# Script mejorado para crear ISO personalizada booteable con preseed integrado
+# Script para crear ISO personalizada booteable con preseed integrado para Ubuntu
 # Autor: Rodrigo Álvarez (@incognia)  
-# Fecha: 2025-07-21
-# Versión: 2.0 - Con soporte completo EFI/UEFI
+# Fecha: 2025-08-01
+# Versión: 2.0 - Con soporte completo UEFI/BIOS híbrido
 
 set -e  # Salir si hay algún error
 
 # Variables configurables
-ORIGINAL_ISO="debian-12.11.0-amd64-netinst.iso"
-PRESEED_FILE="debian-preseed.cfg"
+ORIGINAL_ISO="ubuntu-24.04.2-live-server-amd64.iso"
+PRESEED_FILE="ubuntu-preseed.cfg"
 NETWORK_SCRIPT="config-network.sh"
-OUTPUT_ISO="debian-12.11.0-amd64-preseed.iso"
+OUTPUT_ISO="ubuntu-24.04.2-live-server-preseed.iso"
 WORK_DIR="iso_custom"
 MOUNT_DIR="iso_mount"
 
-echo "=== Creador de ISO Booteable con Preseed (v2.0) ==="
+echo "=== Creador de ISO Booteable Ubuntu con Preseed (v1.0) ==="
 echo "Original ISO: $ORIGINAL_ISO"
 echo "Preseed file: $PRESEED_FILE" 
 echo "Output ISO: $OUTPUT_ISO"
@@ -98,25 +98,11 @@ cp "$PRESEED_FILE" "$WORK_DIR/preseed.cfg"
 echo "Agregando script de configuración de red..."
 cp "$NETWORK_SCRIPT" "$WORK_DIR/config-network.sh"
 
-# Modificar configuración de arranque para agregar opción automatizada
-echo "Modificando configuración de arranque..."
+# Modificar configuración de arranque para Ubuntu Live Server
+echo "Modificando configuración de arranque para Ubuntu..."
 
-# Crear nueva configuración con modo automatizado predeterminado
-cat > "$WORK_DIR/isolinux/txt.cfg" << 'EOF'
-default autoinstall
-timeout 50
-
-label autoinstall
-	menu label ^Automated Install (Preseed) [DEFAULT]
-	menu default
-	kernel /install.amd/vmlinuz
-	append vga=788 initrd=/install.amd/initrd.gz auto=true priority=critical preseed/file=/cdrom/preseed.cfg locale=es_MX console-setup/ask_detect=false keyboard-configuration/xkb-keymap=latam --- quiet
-
-label install
-	menu label ^Install
-	kernel /install.amd/vmlinuz
-	append vga=788 initrd=/install.amd/initrd.gz --- quiet 
-EOF
+# Ubuntu Live Server solo usa GRUB, no isolinux
+echo "Ubuntu Live Server usa solo GRUB para arranque..."
 
 # También agregar la opción al menú de GRUB para EFI
 if [ -d "$WORK_DIR/boot/grub" ]; then
@@ -142,14 +128,14 @@ set default=0
 
 menuentry --hotkey=a 'Automated Install (Preseed)' {
     set background_color=black
-    linux    /install.amd/vmlinuz vga=788 auto=true priority=critical preseed/file=/cdrom/preseed.cfg locale=es_MX console-setup/ask_detect=false keyboard-configuration/xkb-keymap=latam --- quiet 
-    initrd   /install.amd/initrd.gz
+    linux    /casper/vmlinuz boot=casper automatic-ubiquity noprobe noescape preseed/file=/cdrom/preseed.cfg locale=es_MX console-setup/ask_detect=false keyboard-configuration/xkb-keymap=latam --- quiet 
+    initrd   /casper/initrd
 }
 
 EOF
         
         # Agregar el resto de entradas desde el archivo original
-        grep -A 1000 "menuentry" "$WORK_DIR/boot/grub/grub.cfg.bak" | grep -v "Automated install" >> "$WORK_DIR/boot/grub/grub.cfg"
+        grep -A 1000 "menuentry" "$WORK_DIR/boot/grub/grub.cfg.bak" | grep -v "Automated Install" >> "$WORK_DIR/boot/grub/grub.cfg"
     fi
 fi
 
@@ -171,19 +157,131 @@ else
     echo "⚠ No se detectó soporte EFI, creando ISO solo BIOS"
 fi
 
-# Crear ISO con parámetros mejorados
-genisoimage -r -J -joliet-long \
-    -l -cache-inodes \
-    -iso-level 3 \
-    -b isolinux/isolinux.bin \
-    -c isolinux/boot.cat \
-    -no-emul-boot \
-    -boot-load-size 4 \
-    -boot-info-table \
-    $EFI_SUPPORT \
-    -V "Debian 12.11.0 amd64 Preseed" \
-    -o "$OUTPUT_ISO" \
-    "$WORK_DIR/"
+# Crear ISO con soporte completo UEFI/BIOS usando xorriso
+echo "Creando ISO con soporte híbrido UEFI/BIOS..."
+
+# Buscar archivos EFI necesarios
+EFI_BOOT_IMG=""
+if [ -f "$WORK_DIR/EFI/boot/bootx64.efi" ]; then
+    echo "✓ Detectados archivos EFI, creando imagen híbrida UEFI/BIOS"
+    
+    # Crear imagen EFI temporal si no existe
+    if [ ! -f "$WORK_DIR/boot/grub/efi.img" ]; then
+        echo "Creando imagen EFI temporal..."
+        # Usar el directorio EFI existente para crear la imagen
+        EFI_BOOT_IMG="EFI/boot/bootx64.efi"
+    else
+        EFI_BOOT_IMG="boot/grub/efi.img"
+    fi
+else
+    echo "⚠ No se encontraron archivos EFI, creando ISO solo BIOS"
+fi
+
+# Intentar con xorriso para soporte completo
+if command -v xorriso >/dev/null 2>&1; then
+    echo "Usando xorriso para imagen híbrida..."
+    
+    if [ -n "$EFI_BOOT_IMG" ]; then
+        # Crear imagen EFI temporal
+        echo "Creando imagen EFI temporal..."
+        EFI_IMG_TEMP="$WORK_DIR/efiboot.img"
+        
+        # Crear una imagen FAT para EFI
+        dd if=/dev/zero of="$EFI_IMG_TEMP" bs=1M count=10 2>/dev/null
+        mkfs.fat -F32 "$EFI_IMG_TEMP" >/dev/null 2>&1
+        
+        # Montar temporalmente la imagen EFI
+        EFI_MOUNT_DIR="efi_temp"
+        mkdir -p "$EFI_MOUNT_DIR"
+        sudo mount -o loop "$EFI_IMG_TEMP" "$EFI_MOUNT_DIR" 2>/dev/null || {
+            echo "No se pudo montar imagen EFI, usando método alternativo..."
+            rm -f "$EFI_IMG_TEMP"
+            rm -rf "$EFI_MOUNT_DIR"
+            EFI_IMG_TEMP=""
+        }
+        
+        if [ -n "$EFI_IMG_TEMP" ]; then
+            # Copiar archivos EFI
+            sudo mkdir -p "$EFI_MOUNT_DIR/EFI/boot"
+            sudo cp "$WORK_DIR/EFI/boot/"* "$EFI_MOUNT_DIR/EFI/boot/" 2>/dev/null || true
+            sudo umount "$EFI_MOUNT_DIR"
+            rm -rf "$EFI_MOUNT_DIR"
+            
+            # Crear ISO híbrida UEFI/BIOS con partición EFI
+            xorriso -as mkisofs \
+                -r -V "Ubuntu2404Preseed" \
+                -o "$OUTPUT_ISO" \
+                -J -joliet-long -l \
+                -iso-level 3 \
+                -b boot/grub/i386-pc/eltorito.img \
+                -no-emul-boot -boot-load-size 4 -boot-info-table \
+                --grub2-boot-info \
+                -eltorito-alt-boot \
+                -e efiboot.img \
+                -no-emul-boot \
+                -isohybrid-gpt-basdat \
+                -append_partition 2 0xef "$EFI_IMG_TEMP" \
+                "$WORK_DIR/" && {
+                    echo "✓ ISO híbrida UEFI/BIOS creada exitosamente"
+                    rm -f "$EFI_IMG_TEMP"
+                } || {
+                    echo "xorriso con partición EFI falló, usando método simple..."
+                    rm -f "$EFI_IMG_TEMP"
+                    xorriso -as mkisofs \
+                        -r -V "Ubuntu2404Preseed" \
+                        -o "$OUTPUT_ISO" \
+                        -J -joliet-long -l \
+                        -iso-level 3 \
+                        -b boot/grub/i386-pc/eltorito.img \
+                        -no-emul-boot -boot-load-size 4 -boot-info-table \
+                        --grub2-boot-info \
+                        -eltorito-alt-boot \
+                        -e "$EFI_BOOT_IMG" \
+                        -no-emul-boot \
+                        "$WORK_DIR/"
+                }
+        else
+            # Método simple sin partición EFI
+            xorriso -as mkisofs \
+                -r -V "Ubuntu2404Preseed" \
+                -o "$OUTPUT_ISO" \
+                -J -joliet-long -l \
+                -iso-level 3 \
+                -b boot/grub/i386-pc/eltorito.img \
+                -no-emul-boot -boot-load-size 4 -boot-info-table \
+                --grub2-boot-info \
+                -eltorito-alt-boot \
+                -e "$EFI_BOOT_IMG" \
+                -no-emul-boot \
+                "$WORK_DIR/"
+        fi
+    else
+        # Solo BIOS
+        xorriso -as mkisofs \
+            -r -V "Ubuntu2404Preseed" \
+            -o "$OUTPUT_ISO" \
+            -J -joliet-long -l \
+            -iso-level 3 \
+            -b boot/grub/i386-pc/eltorito.img \
+            -no-emul-boot -boot-load-size 4 -boot-info-table \
+            --grub2-boot-info \
+            "$WORK_DIR/"
+    fi
+else
+    # Fallback a genisoimage
+    echo "xorriso no disponible, usando genisoimage (solo BIOS)..."
+    genisoimage -r -J -joliet-long \
+        -l -cache-inodes \
+        -iso-level 3 \
+        -b boot/grub/i386-pc/eltorito.img \
+        -c boot.catalog \
+        -no-emul-boot \
+        -boot-load-size 4 \
+        -boot-info-table \
+        -V "Ubuntu2404Preseed" \
+        -o "$OUTPUT_ISO" \
+        "$WORK_DIR/"
+fi
 
 # Hacer la ISO híbrida para arranque desde USB
 if [ "$ISOHYBRID_AVAILABLE" = true ]; then
@@ -204,7 +302,7 @@ echo "Limpiando directorios temporales..."
 rm -rf "$WORK_DIR" "$MOUNT_DIR"
 
 echo
-echo "✅ ISO personalizada booteable creada exitosamente: $OUTPUT_ISO"
+echo "✅ ISO personalizada booteable de Ubuntu creada exitosamente: $OUTPUT_ISO"
 echo "Tamaño: $(du -h "$OUTPUT_ISO" | cut -f1)"
 echo
 
